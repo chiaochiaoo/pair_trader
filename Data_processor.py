@@ -1,0 +1,197 @@
+import TOS
+import threading
+import time
+import pandas as pd
+import numpy as np
+import datetime
+import Functions as chiao
+
+#cur_minute = pd.to_datetime(cur_time,format='%H:%M:%S')
+####
+
+############### TEST CODE ##########################
+
+TESTMODE = False
+REALMODE = True
+
+class Data_processor:
+
+	def __init__(self,symbols,interval,tos_mode,readlock):
+
+		self.symbols = symbols
+		self.tosmode = tos_mode
+		self.interval = interval
+
+		# This is the bin value, gather, and clean after every interval. Used with TOS. 
+
+		self.binlock = threading.Lock()
+		self.tos_registration = False
+		self.price ={}
+		self.volume = {}
+
+		# This is temporary filed 
+		self.price_temp = {}
+		self.volume_temp = {}
+		self.mean_temp = {}
+		self.volume_sum_temp = {}
+		self.transaction_temp = {}
+
+		# This is the synchronous value, update upon every interval and for external read. 
+
+		self.readlock = readlock
+
+		self.init_price = {}
+		self.cur_time = []
+
+		self.cur_price = {}
+		self.cur_volume = {}
+		self.cur_transaction = {}
+
+		# This is where we keep the original data - for , 30 time period. 
+		self.cur_price_list = {}
+		self.cur_volume_list = {}
+		self.cur_transaction_list = {}
+
+
+		### field for potential pair trade mode.
+
+
+		# Initialize the data strucutres. 
+
+		for i in symbols:
+
+			self.price[i] = []
+			self.volume[i] = []
+
+			self.price_temp[i] = []
+			self.volume_temp[i] = []
+			self.mean_temp[i] = 0
+			self.volume_sum_temp[i] = 0
+			self.transaction_temp[i] = 0
+
+			self.init_price[i] =0
+			self.cur_price[i] =0
+			self.cur_volume[i] =0
+			self.cur_transaction[i] =0
+
+			# this store the movement of all.
+			self.cur_price_list[i] = []
+			self.cur_volume_list[i] = []
+			self.cur_transaction_list[i] = []
+
+		# ERROR CHECKING.
+
+
+		
+
+	def tos_start(self):
+		### time to start harvesting 
+
+		tos = threading.Thread(target=TOS.TOS_init, args=(self.symbols,self.price,self.volume,self.binlock,self.tosmode), daemon=True)
+		tos.start()
+
+		### WE need to wait until bin of each symbol get something. 
+
+		check = 0
+		while check != len(self.symbols):
+			check = 0
+			with self.binlock:
+				for i in self.symbols:
+					if len(self.price[i])>0:
+						self.init_price[i] = chiao.mean(self.price[i])
+						check += 1
+
+		print("Console (DP): All data from each symbols received, data processing begins. ")
+
+
+		return True
+
+	def start(self):
+
+		self.tos_start()
+
+		interval = self.interval
+		while True:
+
+			current_time = time.time()
+
+			self.aggregate_data()
+
+			lag = (time.time() - current_time)
+			sleep = self.interval
+			if interval*1000-lag> 0 : sleep = (interval*1000-lag)/1000
+			print("\nConsole (DP): Processing for ",round(lag*1000,2),"ms , Sleep for",round(sleep,5),"s \n")
+
+			###if pair trade mode is on, display the info###
+
+			time.sleep(sleep)
+
+
+
+
+	def aggregate_data(self):
+
+		# This is one executation of the INTERVAL loop. 
+
+		# 0. Initialize the values we need.
+		#col=['time','mean','volume','open','close','high','low','vwap','std',"transaction"]
+
+		# 1. Take the values from the bin. 
+		with self.binlock:
+			for i in self.symbols:
+				print("Console (DP): Processing",i,"transaction counts:",len(self.price[i]),len(self.volume[i]))
+				self.price_temp[i] = self.price[i][:]
+				self.volume_temp[i] = self.volume[i][:]
+				self.price[i] = []
+				self.volume[i] = []
+
+
+		# Calculate the values and clear out the bins
+		now = datetime.datetime.now()
+		t = '{}:{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute),  '{:02d}'.format(now.second))
+		# if there is update, use the newest update. else, use old data...
+
+
+		for i in self.symbols:
+			
+				if (len(self.price_temp[i])>0):
+					self.mean_temp[i] = chiao.mean(self.price_temp[i])
+					self.volume_sum_temp[i] = sum(self.volume_temp[i])
+					self.transaction_temp[i] = len(self.price_temp[i])
+					# open_ = self.price_temp[i][0]
+					# close_ = self.price_temp[i][-1]
+					# high_ = max(pself.rice_temp[i])
+					# low_ = min(self.price_temp[i])
+					# vwap_ = chiao.vwap(self.price_temp[i],self.volume_temp[i]) 
+					# std_ = np.std(self.price_temp[i])
+					# clear off the thing. 
+					# d = pd.DataFrame([[t,mean_,volume_,open_,close_,high_,low_,vwap_,std_,tran_]], columns=col)
+
+				else:
+					self.volume_sum[i] = 0
+					self.transaction[i] = 0
+
+				print("Console (DP): ",i,":price",round(self.mean_temp[i],4),"volume",self.volume_sum_temp[i],"transaction",self.transaction_temp[i])
+
+		# Assign the values to our external read section. 
+		with self.readlock:
+			for i in self.symbols:
+				self.cur_price[i] = self.mean_temp[i]
+				self.cur_volume[i] =self.volume_sum_temp[i]
+				self.cur_transaction[i] = self.transaction_temp[i]
+				self.cur_price_list[i].append(self.mean_temp[i])
+				self.cur_volume_list[i].append(self.volume_sum_temp[i])
+
+
+		#TODO
+		#### WRITING BLOCK SAVE TO A CSV FILE ####################
+
+
+
+####### USE.
+
+# symbols = ["a","b"]
+# readlock = threading.Lock()
+# test = Data_processor(symbols,5,TESTMODE,readlock)
+# test.start()
+
