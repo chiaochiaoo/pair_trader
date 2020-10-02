@@ -6,7 +6,8 @@ import datetime
 import Functions as chiao
 from Data_processor import Data_processor
 
-
+import sys
+import os
 ##########################################
 
 
@@ -262,12 +263,21 @@ class Pair_trading_processor(Data_processor):
 	#def graph(self):
 
 
+
+mode  = sys.argv[1]
+
 symbols = ["SPY.AM","QQQ.NQ"]
 readlock = threading.Lock()
-test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
 
-#test = Pair_trading_processor(symbols,5,REALMODE,readlock)
-test.start()
+if mode == "t":
+	test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
+	test.start()
+elif mode ==  "r":
+	test = Pair_trading_processor(symbols,5,REALMODE,readlock)
+	test.start()
+if mode != "t" and  mode !=  "r":
+	print("Console: Wrong input")
+	os._exit(1)
 
 
 # target=TOS_init, args=(Symbol,Price,Volume), daemon=True
@@ -399,7 +409,8 @@ cor30.set_ylim([0,1])
 # cor2.set_title("Moving Correlation, period 15 min",fontsize=8)
 # cor2.tick_params(axis='both', which='major', labelsize=8)
 
-min_form = DateFormatter("%H:%M:%S")
+#min_form = DateFormatter("%H:%M:%S")
+min_form = DateFormatter("%H:%M")
 daily_spread.xaxis.set_major_formatter(min_form)
 vol15.xaxis.set_major_formatter(min_form)
 vol30.xaxis.set_major_formatter(min_form)
@@ -427,6 +438,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 	global SMA
 	global hist_spread
 	global f
+	global props
 
 	with readlock:
 		
@@ -515,17 +527,22 @@ def update(self,PT:Pair_trading_processor,readlock):
 				cor30.set_yticks(yrange_cor)
 				cor30.set_title("Correlation 30 min: Current : "+ str(round(cor_30[-1],2)),fontsize=8)
 
-			props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+				#props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+				daily_spread.legend(fontsize=6,loc="upper left")
+				vol15.legend(fontsize=6,loc="upper left")
+				vol30.legend(fontsize=6,loc="upper left")
+				roc.legend(fontsize=6,loc="upper left")
+
+				min_form = DateFormatter("%H:%M")
+				daily_spread.xaxis.set_major_formatter(min_form)
+				roc.xaxis.set_major_formatter(min_form)
+				vol15.xaxis.set_major_formatter(min_form)
+				vol30.xaxis.set_major_formatter(min_form)
+				cor15.xaxis.set_major_formatter(min_form)
+				cor30.xaxis.set_major_formatter(min_form)
+
+
 			plt.text(0.5, 0.81, alert_text+alert_info, fontsize=11, transform=plt.gcf().transFigure,bbox=props, verticalalignment='center')
-
-
-			daily_spread.legend(fontsize=6,loc="upper left")
-			vol15.legend(fontsize=6,loc="upper left")
-			vol30.legend(fontsize=6,loc="upper left")
-			# vol15.legend(fontsize=5,loc="upper right")
-			# vol15.legend(fontsize=5,loc="upper right")
-			roc.legend(fontsize=6,loc="upper left")
-
 
 			# vol15.set_xticks(xtick)
 			# vol30.set_xticks(xtick)
