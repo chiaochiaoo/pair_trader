@@ -264,9 +264,9 @@ class Pair_trading_processor(Data_processor):
 
 symbols = ["SPY.AM","QQQ.NQ"]
 readlock = threading.Lock()
-test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
+#test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
 
-#test = Pair_trading_processor(symbols,5,REALMODE,readlock)
+test = Pair_trading_processor(symbols,5,REALMODE,readlock)
 test.start()
 
 
