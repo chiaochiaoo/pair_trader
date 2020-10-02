@@ -173,7 +173,7 @@ def stat_extractor(argv):
 	else:
 
 		file_created = []
-		for i in range(1,len(argv)):
+		for i in range(len(argv)):
 			file  = argv[i]
 			start = time.time() 
 			S =pd.read_csv(file,names=["day","time","open","high","low","close","volume"])
@@ -244,6 +244,6 @@ def stat_extractor(argv):
 			print("Meta file CSV export successful, time taken:"+str(round(end-start,2))+" seconds");
 			file_created.append(file[:-4]+"stat.csv")
 			
-		return True
+		return file_created
 
 
