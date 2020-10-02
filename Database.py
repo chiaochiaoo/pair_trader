@@ -5,6 +5,7 @@ import datetime
 import Meta_extractor_lib
 import pandas as pd
 import numpy as np
+import os
 
 try:
     import requests
@@ -26,7 +27,9 @@ except ImportError:
 
 
 #STEP 1, Log in
-
+if not path.exists("data"):
+    os.mkdir("data")
+    
 while True:
 
     now = datetime.datetime.now()
