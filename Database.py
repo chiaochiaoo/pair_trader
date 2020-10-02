@@ -27,9 +27,9 @@ except ImportError:
 
 
 #STEP 1, Log in
-if not path.exists("data"):
+if not os.path.exists("data"):
     os.mkdir("data")
-    
+
 while True:
 
     now = datetime.datetime.now()
