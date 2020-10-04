@@ -263,25 +263,29 @@ class Pair_trading_processor(Data_processor):
 	#def graph(self):
 
 
-
-mode  = sys.argv[1]
-
-symbols = ["SPY.AM","QQQ.NQ"]
-readlock = threading.Lock()
-
-if mode == "t":
-	test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
+if len(sys.argv) ==1:
+	symbols = ["SPY.AM","QQQ.NQ"]
+	readlock = threading.Lock()
+	test = Pair_trading_processor(symbols,5,TESTMODE,readlock)
 	test.start()
-elif mode ==  "r":
-	test = Pair_trading_processor(symbols,5,REALMODE,readlock)
-	test.start()
-if mode != "t" and  mode !=  "r":
-	print("Console: Wrong input")
-	os._exit(1)
-#test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
 
-test = Pair_trading_processor(symbols,5,REALMODE,readlock)
-test.start()
+else:
+	mode  = sys.argv[1]
+
+	symbols = ["SPY.AM","QQQ.NQ"]
+	readlock = threading.Lock()
+
+	if mode == "t":
+		test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
+		test.start()
+	elif mode ==  "r":
+		test = Pair_trading_processor(symbols,5,REALMODE,readlock)
+		test.start()
+	if mode != "t" and  mode !=  "r":
+		print("Console: Wrong input")
+		os._exit(1)
+	#test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
+
 
 
 # target=TOS_init, args=(Symbol,Price,Volume), daemon=True
@@ -325,8 +329,6 @@ test.start()
 
 
 #### FUNCTION 2:  GRAPHING
-
-
 
 	
 plt.style.use("seaborn-darkgrid")
