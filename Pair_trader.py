@@ -278,6 +278,10 @@ elif mode ==  "r":
 if mode != "t" and  mode !=  "r":
 	print("Console: Wrong input")
 	os._exit(1)
+#test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
+
+test = Pair_trading_processor(symbols,5,REALMODE,readlock)
+test.start()
 
 
 # target=TOS_init, args=(Symbol,Price,Volume), daemon=True
