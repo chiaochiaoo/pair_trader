@@ -59,6 +59,13 @@ class Data_processor:
 			self.volume_sum_temp[i] = 0
 			self.transaction_temp[i] = 0
 
+		# old values 
+
+		self.cur_price_list = {}
+		for i in symbols:
+
+			self.cur_price_list[i] = []
+
 		# This is the synchronous value, update upon every interval and for external read. 
 
 
@@ -277,6 +284,7 @@ class Data_processor:
 				self.cur_volume[i] =self.volume_sum_temp[i]
 				self.cur_transaction[i] = self.transaction_temp[i]
 				
+				self.cur_price_list[i].append(self.cur_price[i])
 				#i don't need these temporary values for now 
 				self.cur_minute_price_list[i].append(self.cur_price[i])
 				self.cur_minute_volume_list[i].append(self.cur_volume[i])
