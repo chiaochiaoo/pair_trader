@@ -3,6 +3,7 @@ import random
 import subprocess
 import datetime
 import Meta_extractor_lib
+import Spread_extractor_lib
 import pandas as pd
 import numpy as np
 import os
@@ -36,8 +37,8 @@ while True:
     #time_str = '{}_{}_{}'.format()
     time_min = '{}_{}_{}:{}:{}'.format('{:02d}'.format(now.month), '{:02d}'.format(now.day),'{:02d}'.format(now.hour), '{:02d}'.format(now.minute), '{:02d}'.format(now.second))
 
-    print("System running at: ",time_min)
-    print("Registering...")
+    print("Database: System running at: ",time_min)
+    print("Database: Registering...")
     postbody = "http://api.kibot.com/?action=login&user=sajali26@hotmail.com&password=guupu4upu"
     r= requests.post(postbody)
 
@@ -58,10 +59,10 @@ while True:
             with open(temp+spy, "w") as text_file:
                 text_file.write(t)
 
-            print("SPY data update at:",time_min)
+            print("Database: SPY data update at:",time_min)
             success+=1
         else:
-            print("Failed to get data from SPY")
+            print("Database: Failed to get data from SPY")
 
         postbody = "http://api.kibot.com/?action=history&symbol=QQQ&interval=1&period=30"
         r= requests.post(postbody)
@@ -69,16 +70,17 @@ while True:
             t=r.text
             with open(temp+qqq, "w") as text_file:
                 text_file.write(t)
-            print("QQQ data update at:",time_min)
+            print("Database: QQQ data update at:",time_min)
             success+=1
         else:
-            print("Failed to get data from QQQ")
+            print("Database: Failed to get data from QQQ")
 
         update = []
         #Step 2 Meta process
         if success ==2:
             update = Meta_extractor_lib.stat_extractor([temp+spy,temp+qqq])
 
+            update.append(Spread_extractor_lib.spread_extractor([temp+spy,temp+qqq,"SPY","QQQ"]))
             print(update)
             #Step 4 git hub upload
             if len(update)>0:
@@ -92,9 +94,10 @@ while True:
 
     #error from Step1 
     else:
-        print("Failed to registrate, abort.")
+        print("Database: Failed to registrate, abort.")
 
 
+    print("Database: Cycle completed. Sleep for 30 minutes")
     time.sleep(1800)
 
 

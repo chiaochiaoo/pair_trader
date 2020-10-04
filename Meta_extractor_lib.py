@@ -165,7 +165,7 @@ def pre_processor(s):
 
 def stat_extractor(argv):
 	if len(argv)<2:
-		print("Need to pass in one or multiple file")
+		print("Stats Extractor: Need to pass in one or multiple file")
 		return []
 		#os._exit(1)
 		
@@ -178,7 +178,7 @@ def stat_extractor(argv):
 			start = time.time() 
 			S =pd.read_csv(file,names=["day","time","open","high","low","close","volume"])
 			
-			print("Processing", file[:-4]," containing minutes:",len(S))
+			print("Stats Extractor: Processing", file[:-4]," containing minutes:",len(S))
 			#process
 			pre_processor(S)
 
@@ -241,7 +241,7 @@ def stat_extractor(argv):
 
 			d.to_csv(file[:-4]+"stat.csv")
 			end = time.time()
-			print("Meta file CSV export successful, time taken:"+str(round(end-start,2))+" seconds");
+			print("Stats Extractor:: Meta file CSV export successful, time taken:"+str(round(end-start,2))+" seconds");
 			file_created.append(file[:-4]+"stat.csv")
 			
 		return file_created

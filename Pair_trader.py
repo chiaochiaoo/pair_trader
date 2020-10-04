@@ -321,6 +321,9 @@ test.start()
 
 
 
+#pd.to_datetime(t,format='%m/%d/%Y %H:%M')
+
+
 #### FUNCTION 2:  GRAPHING
 
 
