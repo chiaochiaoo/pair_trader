@@ -111,7 +111,49 @@ def get_milisec(time_str,mili):
     h, m, s = time_str.split(':')
     return 1000*(int(h) * 3600 + int(m) * 60 + int(s))+int(mili)
 
+def IQR(x):
+    
+    if len(x)> 5:
+        q75, q25 = np.percentile(x, [75 ,25])
+        iqr = (q75 - q25)*1.5
+        ### only take the good one.
+        y = []
+        for i in x:
+            if (i <= q75 + iqr) and (i >= q25 - iqr):
+                y.append(i)
+                
+        x = y[:]
+        #print(q75,q25,iqr)
+        
+    return x
 
+
+def get_min(time_str):
+    """Get Seconds from time."""
+    h, m= time_str.split(':')
+    #print(h,m)
+    return int(h) * 60 + int(m)
+
+
+
+def ts_to_str(timestamp):
+    
+    h= int(timestamp//60)
+    m= int(timestamp%60)
+
+    #chekc if they are 1 unit.
+    
+    if h//10 == 0:
+        h = "0"+str(h)
+    else:
+        h = str(h)
+        
+    if m//10 == 0:
+        m = "0"+str(m)
+    else:
+        m = str(m)
+        
+    return(h+":"+m)
 # import datetime
 # now = datetime.datetime.now()
 
