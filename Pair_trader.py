@@ -8,6 +8,7 @@ from Data_processor import Data_processor
 from matplotlib.ticker import FuncFormatter
 import sys
 import os
+import multiprocessing
 ##########################################
 
 
@@ -469,7 +470,7 @@ cor15.locator_params(axis='x', nbins=6)
 cor15.set_ylim([0,1])
 
 cor30 = f.add_subplot(5,3,14)
-cor30.set_title("Moving Correlation, period 30 min",fontsize=8)
+cor30.set_title("Moving Correlation, period 15 min",fontsize=8)
 cor30.tick_params(axis='both', which='major', labelsize=8)
 cor30.locator_params(axis='x', nbins=6)
 cor30.set_ylim([0,1])
@@ -621,7 +622,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 				vol15.plot(cur_minute,[0.5 for i in range(len(cur_minute))],"c--",label="Middle point",linewidth=1)
 				vol15.set_yticks(yrange)
 
-				vol15.set_title("SPY/QQQ Volume&Transaction Ratio 15 min: Current : "+ str(round(vol_15[-1],2)),fontsize=8)
+				vol15.set_title("Volume&Transaction Ratio 1 min: Current : "+ str(round(vol_15[-1],2)),fontsize=8)
 
 				vol30.clear()
 				vol30.plot(cur_minute,vol_30,"b",label="Volume Ratio")
@@ -629,18 +630,18 @@ def update(self,PT:Pair_trading_processor,readlock):
 				vol30.plot(cur_minute,[0.5 for i in range(len(cur_minute))],"c--",label="Middle point",linewidth=1)
 				vol30.set_yticks(yrange)
 
-				vol30.set_title("SPY/QQQ Volume&Transaction Ratio 30 min: Current : "+ str(round(vol_30[-1],2)),fontsize=8)
+				vol30.set_title("Volume&Transaction Ratio 5 min: Current : "+ str(round(vol_30[-1],2)),fontsize=8)
 
 
 				cor15.clear()
 				cor15.plot(cur_minute,cor_15)
 				cor15.set_yticks(yrange_cor)
-				cor15.set_title("Correlation 15 min: Current : "+ str(round(cor_15[-1],2)),fontsize=8)
+				cor15.set_title("Correlation 3 min: Current : "+ str(round(cor_15[-1],2)),fontsize=8)
 
 				cor30.clear()
 				cor30.plot(cur_minute,cor_30)
 				cor30.set_yticks(yrange_cor)
-				cor30.set_title("Correlation 30 min: Current : "+ str(round(cor_30[-1],2)),fontsize=8)
+				cor30.set_title("Correlation 15 min: Current : "+ str(round(cor_30[-1],2)),fontsize=8)
 
 				#props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 

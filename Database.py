@@ -83,11 +83,14 @@ while True:
             update.append(Spread_extractor_lib.spread_extractor([temp+spy,temp+qqq,"SPY","QQQ"]))
             print(update)
             #Step 4 git hub upload
+            
             if len(update)>0:
+                subprocess.call(["git", "pull"])
                 for i in update:
                     subprocess.call(["git", "add",i])
 
                 subprocess.call(["git", "commit","--m","update at "+time_min])
+
                 subprocess.call(["git", "push"])
         #error from step2
 
