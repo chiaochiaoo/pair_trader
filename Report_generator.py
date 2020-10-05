@@ -139,23 +139,22 @@ def report(symbol):
     ret += printer(d,"1 minute extreme range on average occur during ")
     ret += " \n"
 
-    ret +=printer(d5,"5 minute extreme range on average occur during")   
+    ret +=printer(d5,"5 minute extreme range on average occur during ")   
     ret += " \n"
-    ret +=printer(d30,"30 minute extreme range on average occur during")   
+    ret +=printer(d30,"30 minute extreme range on average occur during ")   
     ret += " \n"
 
-
-    ret +=printer(v1,"1 minute extreme volume on average occur during")
+    ret +=printer(v1,"1 minute extreme volume on average occur during ")
     ret += " \n"
-    ret +=printer(v5,"5 minute extreme volume on average occur during")
+    ret +=printer(v5,"5 minute extreme volume on average occur during ")
     ret += " \n"
-    ret +=printer(v30,"30 minute extreme volume on average occur during")
+    ret +=printer(v30,"30 minute extreme volume on average occur during ")
     ret += " \n"
-    ret +=printer(roc,"1 minute extreme rate of change on average occur during")
+    ret +=printer(roc,"1 minute extreme rate of change on average occur during ")
     ret += " \n"
-    ret +=printer(roc5,"5 minute extreme rate of change on average occur during")
+    ret +=printer(roc5,"5 minute extreme rate of change on average occur during ")
     ret += " \n"
-    ret +=printer(roc30,"30 minute extreme volume on average occur during")
+    ret +=printer(roc30,"30 minute extreme rate of change on average occur during ")
 
     text_file = open("Report_"+symbol+".txt", "w")
     text_file.write("REPORT ON {0}\n{1}".format(symbol,ret))
