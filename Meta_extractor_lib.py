@@ -163,8 +163,16 @@ def pre_processor(s):
 	s.insert(i+9,"volumeacc", VolumeAcc, True) 
 
 
+def find_between(data, first, last):
+    try:
+        start = data.index(first) + len(first)
+        end = data.index(last, start)
+        return data[start:end]
+    except ValueError:
+        return data
+
 def stat_extractor(argv):
-	if len(argv)<2:
+	if len(argv)<1:
 		print("Stats Extractor: Need to pass in one or multiple file")
 		return []
 		#os._exit(1)
@@ -175,6 +183,7 @@ def stat_extractor(argv):
 		file_created = []
 		for i in range(len(argv)):
 			file  = argv[i]
+			symbol = find_between(file,"/",".")
 			start = time.time() 
 			S =pd.read_csv(file,names=["day","time","open","high","low","close","volume"])
 			
@@ -239,7 +248,7 @@ def stat_extractor(argv):
 				d.insert(len(d.columns),names[i]+"d",distribution, True) 
 
 
-			d.to_csv(file[:-4]+"stat.csv")
+			d.to_csv("data/"+symbol+"stat.csv")
 			end = time.time()
 			print("Stats Extractor:: Meta file CSV export successful, time taken:"+str(round(end-start,2))+" seconds");
 			file_created.append(file[:-4]+"stat.csv")
