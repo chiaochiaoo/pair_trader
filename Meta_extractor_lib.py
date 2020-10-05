@@ -163,87 +163,100 @@ def pre_processor(s):
 	s.insert(i+9,"volumeacc", VolumeAcc, True) 
 
 
+def find_between(data, first, last):
+    try:
+        start = data.index(first) + len(first)
+        end = data.index(last, start)
+        return data[start:end]
+    except ValueError:
+        return data
+
 def stat_extractor(argv):
-	if len(argv)<2:
+	if len(argv)<1:
 		print("Stats Extractor: Need to pass in one or multiple file")
 		return []
 		#os._exit(1)
 		
-	
 	else:
 
 		file_created = []
 		for i in range(len(argv)):
 			file  = argv[i]
+			symbol = find_between(file,"/",".")
 			start = time.time() 
 			S =pd.read_csv(file,names=["day","time","open","high","low","close","volume"])
 			
 			print("Stats Extractor: Processing", file[:-4]," containing minutes:",len(S))
 			#process
-			pre_processor(S)
 
-			p=S.groupby(['timestamp'])
+			if(len(S)>1):
+				pre_processor(S)
 
-			vol=p["volume"].apply(list)
-			vol5=p["volume5"].apply(list)
-			vol30=p["volume30"].apply(list)
-			volacc=p["volumeacc"].apply(list)
+				p=S.groupby(['timestamp'])
 
-			r=p["range"].apply(list)
-			r5=p["range5"].apply(list)
-			r30=p["range30"].apply(list)
+				vol=p["volume"].apply(list)
+				vol5=p["volume5"].apply(list)
+				vol30=p["volume30"].apply(list)
+				volacc=p["volumeacc"].apply(list)
 
-			roc=p["roc"].apply(list)
-			roc5=p["roc5"].apply(list)
-			roc30=p["roc30"].apply(list)
+				r=p["range"].apply(list)
+				r5=p["range5"].apply(list)
+				r30=p["range30"].apply(list)
 
-			process_list = [vol,vol5,vol30,volacc,r,r5,r30,roc,roc5,roc30]
+				roc=p["roc"].apply(list)
+				roc5=p["roc5"].apply(list)
+				roc30=p["roc30"].apply(list)
 
-			names = ["v1","v5","v30","vacc","r","r5","r30","roc","roc5","roc30"]
+				process_list = [vol,vol5,vol30,volacc,r,r5,r30,roc,roc5,roc30]
 
-
-			# STEP 1 : first construct the DataFrame with timestamp and time
-
-			timestamps = list(p.groups.keys())
-
-			times = [ts_to_str(i) for i in timestamps]
-			d = pd.DataFrame(timestamps,columns=["timestamp"])
-
-			d.insert(len(d.columns),"time", times, True) 
+				names = ["v1","v5","v30","vacc","r","r5","r30","roc","roc5","roc30"]
 
 
-			# STEP 2.  For each of the item in processing list. Add them to the dataframe in a similar fashion. 
+				# STEP 1 : first construct the DataFrame with timestamp and time
 
-			for i in range(len(process_list)):
-			
-				mean = [] #Avg
-				distribution = []
-				stds = []
+				timestamps = list(p.groups.keys())
 
-				for key,value in process_list[i].items():
-					distribution.append(value[:])
-					l = IQR(value)
+				times = [ts_to_str(i) for i in timestamps]
+				d = pd.DataFrame(timestamps,columns=["timestamp"])
 
-					if (len(l)<1):
-						print(l,key,value)
-					mean_ = round(np.mean(l),3)
-					std_= round(np.std(l),3)
-					if i <4:
-						mean_ = int(mean_)
-						std_ = int(std_)
-					mean.append(mean_)
-					stds.append(std_)
+				d.insert(len(d.columns),"time", times, True) 
+
+
+				# STEP 2.  For each of the item in processing list. Add them to the dataframe in a similar fashion. 
+
+				for i in range(len(process_list)):
 				
-				d.insert(len(d.columns),names[i]+"m",mean, True) 
-				d.insert(len(d.columns),names[i]+"s",stds, True) 
-				d.insert(len(d.columns),names[i]+"d",distribution, True) 
+					mean = [] #Avg
+					distribution = []
+					stds = []
+
+					for key,value in process_list[i].items():
+						distribution.append(value[:])
+						l = IQR(value)
+
+						if (len(l)<1):
+							print(l,key,value)
+						mean_ = round(np.mean(l),3)
+						std_= round(np.std(l),3)
+						if i <4:
+							mean_ = int(mean_)
+							std_ = int(std_)
+						mean.append(mean_)
+						stds.append(std_)
+					
+					d.insert(len(d.columns),names[i]+"m",mean, True) 
+					d.insert(len(d.columns),names[i]+"s",stds, True) 
+					d.insert(len(d.columns),names[i]+"d",distribution, True) 
 
 
-			d.to_csv(file[:-4]+"stat.csv")
-			end = time.time()
-			print("Stats Extractor:: Meta file CSV export successful, time taken:"+str(round(end-start,2))+" seconds");
-			file_created.append(file[:-4]+"stat.csv")
-			
+				d.to_csv("data/"+symbol+"stat.csv")
+				end = time.time()
+				print("Stats Extractor:: Meta file CSV export successful, time taken:"+str(round(end-start,2))+" seconds");
+				file_created.append(file[:-4]+"stat.csv")
+				
+			else:
+				print("Failed to process file data/",symbol,".txt Please check.")
+
 		return file_created
 
 
