@@ -209,7 +209,7 @@ class Pair_trading_processor(Data_processor):
 			self.cors_10.append(cor_10)
 			self.cors_30.append(cor_30)
 
-		print("Legnth check",len(self.cur_time),len(self.intra_spread),len(self.roc),len(self.cors_10),len(self.vol_ratio_15))
+		#print("Legnth check",len(self.cur_time),len(self.intra_spread),len(self.roc),len(self.cors_10),len(self.vol_ratio_15))
 
 	# integrated graphing conponent. 
 	#def graph(self):
@@ -553,7 +553,10 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 			#daily_spread.plot(cur_minute,intra_spread15,"c",label="MA15")
 			
-			cur = round((intra_spread[-1] - intra_spread5[-1])/intra_std[-1],2)
+			if intra_std[-1]!=0:
+				cur = round((intra_spread[-1] - intra_spread5[-1])/intra_std[-1],2)
+			else:
+				cur = 0
 
 
 			t =""

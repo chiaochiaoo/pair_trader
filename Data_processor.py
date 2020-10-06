@@ -222,7 +222,7 @@ class Data_processor:
 		with self.binlock:
 			for i in self.symbols:
 
-				#print("Console (DP): Processing",i,"transaction counts:",len(self.price[i]),len(self.volume[i]))
+				print("Console (DP): Processing",i,"transaction counts:",len(self.price[i]),len(self.volume[i]))
 				self.price[i] = []
 				self.volume[i] = []
 		#
