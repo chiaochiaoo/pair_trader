@@ -364,9 +364,9 @@ class Data_processor:
 						"\n Range",round(self.minute_range_value[i],3),round(self.minute_range5_value[i],3),round(self.minute_range30_value[i],3),
 						"\n Roc",round(self.minute_roc_value[i],3),round(self.minute_roc5_value[i],3),round(self.minute_roc30_value[i],3),"\n")
 
-					print("Length: minute open close:",len(self.minute_open_list[i]),len(self.minute_close_list[i]))
-					print("Length: volume :",len(self.minute_volume_list[i]),)
-					print("Length: range high_ low:",len(self.minute_high_list[i]),len(self.minute_low_list[i]))
+					#print("Length: minute open close:",len(self.minute_open_list[i]),len(self.minute_close_list[i]))
+					#print("Length: volume :",len(self.minute_volume_list[i]),)
+					#print("Length: range high_ low:",len(self.minute_high_list[i]),len(self.minute_low_list[i]))
 
 
 			#self.histo.set_hist(self)

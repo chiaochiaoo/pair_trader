@@ -209,7 +209,7 @@ class Pair_trading_processor(Data_processor):
 			self.cors_10.append(cor_10)
 			self.cors_30.append(cor_30)
 
-		#print("Legnth check",len(self.cur_time),len(self.intra_spread),len(self.roc),len(self.cors_10),len(self.vol_ratio_15))
+		print("Legnth check",len(self.cur_time),len(self.intra_spread),len(self.roc),len(self.cors_10),len(self.vol_ratio_15))
 
 	# integrated graphing conponent. 
 	#def graph(self):
@@ -589,12 +589,12 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 
 				cor15.clear()
-				cor15.plot(cur_minute,cor_15)
+				cor15.plot(cur_minute[-30:],cor_15[-30:])
 				cor15.set_yticks(yrange_cor)
 				cor15.set_title("Correlation 3 min: Current : "+ str(round(cor_15[-1],2)),fontsize=8)
 
 				cor30.clear()
-				cor30.plot(cur_minute,cor_30)
+				cor30.plot(cur_minute[-30:],cor_30)[-30:]
 				cor30.set_yticks(yrange_cor)
 				cor30.set_title("Correlation 15 min: Current : "+ str(round(cor_30[-1],2)),fontsize=8)
 
@@ -602,7 +602,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 				vol15.legend(fontsize=6,loc="upper left")
 				vol30.legend(fontsize=6,loc="upper left")
-
+				print("Correlation check:",cor15,cor30)
 
 				min_form = DateFormatter("%H:%M")
 				daily_spread.xaxis.set_major_formatter(min_form)
