@@ -602,7 +602,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 				vol15.legend(fontsize=6,loc="upper left")
 				vol30.legend(fontsize=6,loc="upper left")
-				print("Correlation check:",cor15,cor30)
+				print("Correlation check:",cor_15,cor_30)
 
 				min_form = DateFormatter("%H:%M")
 				daily_spread.xaxis.set_major_formatter(min_form)
