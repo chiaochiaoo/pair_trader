@@ -7,8 +7,11 @@ import pandas as pd
 import numpy as np
 
 
-def appendText(ax,h,text,box,break3):
+def appendText(ax,h,text,box,break3,info):
 	lst = []
+
+	ax.text(h, 0.8, info)
+
 	if break3:
 		for i in range(len(text)):
 			offset = 0
@@ -54,6 +57,8 @@ def set_hist_vals(S):
 	std.append(np.std(S["roc5m"][start:end]))
 	std.append(np.std(S["roc30m"][start:end]))
 
+	avg = [round(i,3) for i in avg]
+	std = [round(i,3) for i in std]
 
 	return avg,std
 
@@ -91,19 +96,19 @@ class UI_Alert():
 
 	def __init__(self):
 		mpl.rcParams['toolbar'] = 'None' 
-		self.fig = plt.figure(figsize=(5,5))
+		self.fig = plt.figure(figsize=(10,15))
 		self.fig.canvas.set_window_title('ALERT WINDOW')
 		self.bbox = {'facecolor': 'white', 'alpha': 0.5, 'pad': 3}
-		self.ax = plt.axes([0, 0, 1, 1])
-		self.init = TextBox(self.ax, 'GRAPH CMDs:', initial="")
-
+		self.ax = plt.axes([0.5, 0, 0.5,0.5])
+		#self.init = TextBox(self.ax, 'GRAPH CMDs:', initial="")
+		self.ax.axis("off")
 		self.text1 = ["vol1:      ","vol5:       ","vol30:      ","range1:  ","range5:  ","range30: ","roc1:      ","roc5:       ","roc30:      "]
 		self.text2 = ["PastOneMonth: ","PastOneWeek: ","PastOneDay: ","Current:      ","Vol ratio1: ","Tran ratio1 ","Correlation 1 "]
 
 
-		self.stext = appendText(self.ax,0.1,self.text1,self.bbox,True)
-		self.qtext = appendText(self.ax,0.3,self.text1,self.bbox,True)
-		self.pairtext = appendText(self.ax,0.55,self.text2,self.bbox,False)
+		self.stext = appendText(self.ax,0.1,self.text1,self.bbox,True,"SPY")
+		self.qtext = appendText(self.ax,0.3,self.text1,self.bbox,True,"QQQ")
+		self.pairtext = appendText(self.ax,0.55,self.text2,self.bbox,False,"PAIR")
 
 		
 		S =pd.read_csv('data/SPYstat.csv')

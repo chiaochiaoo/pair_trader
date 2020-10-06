@@ -452,8 +452,59 @@ props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 
 plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace= 0.65)
 
+def set_hist_vals(S):
 
+	dic = {}
 
+	avg = []
+	std = []
+
+	start=S[S['time']=='09:30'].index.values[0]
+	end=S[S['time']=='16:00'].index.values[0]+1
+
+	avg.append(np.mean(S["v1m"][start:end]))
+	avg.append(np.mean(S["v5m"][start:end]))
+	avg.append(np.mean(S["v30m"][start:end]))
+	avg.append(np.mean(S["rm"][start:end]))
+	avg.append(np.mean(S["r5m"][start:end]))
+	avg.append(np.mean(S["r30m"][start:end]))
+	avg.append(np.mean(S["rocm"][start:end]))
+	avg.append(np.mean(S["roc5m"][start:end]))
+	avg.append(np.mean(S["roc30m"][start:end]))
+
+	std.append(np.std(S["v1m"][start:end]))
+	std.append(np.std(S["v5m"][start:end]))
+	std.append(np.std(S["v30m"][start:end]))
+
+	std.append(np.std(S["rm"][start:end]))
+	std.append(np.std(S["r5m"][start:end]))
+	std.append(np.std(S["r30m"][start:end]))
+
+	std.append(np.std(S["rocm"][start:end]))
+	std.append(np.std(S["roc5m"][start:end]))
+	std.append(np.std(S["roc30m"][start:end]))
+
+	avg = [round(i,3) for i in avg]
+	std = [round(i,3) for i in std]
+
+	return avg,std
+def appendText(ax,h,text,box,break3,info):
+	lst = []
+
+	ax.text(h, 0.8, info)
+
+	if break3:
+		for i in range(len(text)):
+			offset = 0
+			if i>2:
+				offset =0.02
+			if i >5:
+				offset =0.04
+			lst.append(ax.text(h, 0.8-((i+1)/20)-offset, text[i]+str(0),bbox=box))
+	else:
+		for i in range(len(text)):
+			lst.append(ax.text(h, 0.8-((i+1)/15), text[i]+str(0),bbox=box))
+	return lst
 def update(self,PT:Pair_trading_processor,readlock):
 
 	global dates
@@ -470,6 +521,8 @@ def update(self,PT:Pair_trading_processor,readlock):
 		if(len(cur_time)>1):
 
 			cur_minute = pd.to_datetime(cur_time,format='%H:%M:%S')
+
+			vals = PT.minute_vals.copy()
 
 			vol_15 = PT.vol_ratio_15
 			vol_30 = PT.vol_ratio_30
@@ -511,12 +564,12 @@ def update(self,PT:Pair_trading_processor,readlock):
 			#conituation of regression. SMA, bollinger 
 
 
-			cur = round((newGAP[-1] - m_reg[-1])/m_std,2)
+			cur_m = round((newGAP[-1] - m_reg[-1])/m_std,2)
 			t =""
-			if cur>=0:
-				t = "+"+str(cur)
+			if cur_m>=0:
+				t = "+"+str(cur_m)
 			else:
-				t = "-"+str(cur)
+				t = "-"+str(cur_m)
 
 			# How many STD away from Mean?
 			# 
@@ -535,12 +588,12 @@ def update(self,PT:Pair_trading_processor,readlock):
 			#conituation of regression. SMA, bollinger 
 
 
-			cur = round((newGAP[-1] - w_reg[-1])/w_std,2)
+			cur_w = round((newGAP[-1] - w_reg[-1])/w_std,2)
 			t =""
-			if cur>=0:
-				t = "+"+str(cur)
+			if cur_w>=0:
+				t = "+"+str(cur_w)
 			else:
-				t = "-"+str(cur)
+				t = "-"+str(cur_w)
 
 			# How many STD away from Mean?
 			# 
@@ -562,12 +615,12 @@ def update(self,PT:Pair_trading_processor,readlock):
 			d_spread.plot(newd2,d_reg,"b--",alpha=0.5) 
 
 
-			cur = round((newGAP[-1] - d_reg[-1])/d_std,2)
+			cur_d = round((newGAP[-1] - d_reg[-1])/d_std,2)
 			t =""
-			if cur>=0:
-				t = "+"+str(cur)
+			if cur_d>=0:
+				t = "+"+str(cur_d)
 			else:
-				t = str(cur)
+				t = str(cur_d)
 
 
 			d_spread.set_title("Last 24 Hours: "+ t+" stds from Regression",fontsize=8)
@@ -582,20 +635,25 @@ def update(self,PT:Pair_trading_processor,readlock):
 			#daily_spread.plot(cur_minute,intra_spread15,"c",label="MA15")
 			
 			if intra_std[-1]!=0:
-				cur = round((intra_spread[-1] - intra_spread5[-1])/intra_std[-1],2)
+				cur_i = round((intra_spread[-1] - intra_spread5[-1])/intra_std[-1],2)
 			else:
-				cur = 0
+				cur_i = 0
 
 
 			t =""
-			if cur>=0:
-				t = "+"+str(cur)
+			if cur_i>=0:
+				t = "+"+str(cur_i)
 			else:
-				t = str(cur)
+				t = str(cur_i)
 
 			daily_spread.set_title("Current: "+ t+" stds from Mean",fontsize=8)
 
 			daily_spread.legend(fontsize=6,loc="upper left")
+
+
+			val_vol = 0
+			val_tran = 0
+			val_cor = 0
 
 			if (len(cur_minute)==len(vol_15) and len(vol_15)>5):
 
@@ -652,12 +710,100 @@ def update(self,PT:Pair_trading_processor,readlock):
 				cor30.xaxis.set_major_formatter(min_form)
 
 
+				val_vol = round(vol_15[-1],2)
+				val_tran = round(tran_ratio_15[-1],2)
+				val_cor = round(cor_15[-1])
+				
+
 			#plt.text(0.1, 0.81, alert_text+alert_info, fontsize=11, transform=plt.gcf().transFigure,bbox=props, verticalalignment='center')
 
 			# vol15.set_xticks(xtick)
 			# vol30.set_xticks(xtick)
 			# cor15.set_xticks(xtick)
 			# cor30.set_xticks(xtick)
+
+			#Set the values 
+
+			val_pair = [cur_m,cur_w,cur_d,cur_i,cur_i,val_vol,val_tran,val_cor]
+			set_symbol_text(stext,text1,vals["SPY.AM"],savg,sstd)
+			set_symbol_text(qtext,text1,vals["QQQ.NQ"],qval,qstd)
+
+			set_pair_text(pairtext,text2,val_pair)
+
+def check_color(z):
+
+	z=abs(z)
+	if z>=2:
+		return "red"
+	elif z>=1:
+		return "yellow"
+	elif z>0:
+		return "green"
+	elif z==0:
+		return "white"
+
+def set_symbol_text(textboxes,texts,vals,means,stds):
+
+	for i in range(len(textboxes)):
+
+		cur = vals[i]
+		mean = means[i]
+		std = stds[i]
+
+		if cur!=0:
+			z=0
+			if std!=0 :
+				z = round(((cur-mean)/std),2)
+				zs =str(z)
+				if z>=0: 
+					zs = "+"+str(z)
+			if i<3:
+				textboxes[i].set_text(texts[i]+zs+" STDs")
+				textboxes[i].set_backgroundcolor(check_color(z))
+			else:
+				textboxes[i].set_text(texts[i]+str(vals[i])+" "+zs+" STDs")
+				textboxes[i].set_backgroundcolor(check_color(z))
+
+def set_pair_text(textboxes,texts,vals):
+
+
+	for i in range(len(textboxes)):
+		cur = vals[i]
+
+		textboxes[i].set_text(texts[i]+str(cur))
+
+################### ALERT PANNEL ### ############
+
+bbox = {'facecolor': 'white', 'alpha': 0.5, 'pad': 3}
+ax = plt.axes([0.5, 0.5, 0.5,0.5])
+ax.axis('off')
+
+text1 = ["vol1:      ","vol5:       ","vol30:      ","range1:  ","range5:  ","range30: ","roc1:      ","roc5:       ","roc30:      "]
+text2 = ["PastOneMonth: ","PastOneWeek: ","PastOneDay: ","Current_5MA:      ","Current_15MA:      ","Vol ratio1: ","Tran ratio1 ","Correlation 1 "]
+
+stext = appendText(ax,0.1,text1,bbox,True,"SPY.AM")
+qtext = appendText(ax,0.3,text1,bbox,True,"QQQ.NQ")
+
+pairtext = appendText(ax,0.55,text2,bbox,False,"Pair")
+
+
+#### SETTING UP ALERTS SYSTEM. 
+sval = []
+qval = []
+S =pd.read_csv('data/SPYstat.csv')
+Q =pd.read_csv('data/QQQstat.csv')
+savg,sstd = set_hist_vals(S)
+qval,qstd = set_hist_vals(Q)
+
+
+
+
+##
+
+################################################
+
+
+
 
 
 ani = FuncAnimation(f,update,fargs=(test,readlock),interval=5000)

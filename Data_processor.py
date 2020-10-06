@@ -22,9 +22,9 @@ REALMODE = True
 
 class Data_processor:
 
-	def __init__(self,symbols,interval,tos_mode,readlock,histo=None):
+	def __init__(self,symbols,interval,tos_mode,readlock):
 
-		self.histo = histo
+
 
 		self.symbols = symbols
 		self.tosmode = tos_mode
@@ -34,6 +34,10 @@ class Data_processor:
 		self.cur_minute_list = []
 		self.cur_minute = 0
 		self.readlock = readlock
+
+
+
+
 
 		# minute counter is in how many loops it will become one minute. 
 		self.minute_counter = 30//interval 
@@ -167,7 +171,12 @@ class Data_processor:
 			self.minute_close_list[i] = []
 
 
-		#self.histo.set_hist(self)
+
+		# A list of vallues contain vol1 ,vol5, vol30, range1,530, roc1,5,30
+		self.minute_vals = {}
+		for i in symbols:
+
+			self.minute_vals[i] = [0,0,0,0,0,0,0,0,0]
 		# ERROR CHECKING ?
 
  
@@ -360,16 +369,20 @@ class Data_processor:
 					self.cur_minute_volume_list[i] = []
 					self.cur_minute_price_list[i] = []
 
-					print("\nConsole (DP): One Minute ",i,"Volume sum:",self.minute_volume_value[i],self.minute_volume5_value[i],self.minute_volume30_value[i],
-						"\n Range",round(self.minute_range_value[i],3),round(self.minute_range5_value[i],3),round(self.minute_range30_value[i],3),
-						"\n Roc",round(self.minute_roc_value[i],3),round(self.minute_roc5_value[i],3),round(self.minute_roc30_value[i],3),"\n")
+					self.minute_vals[i] = [self.minute_volume_value[i],self.minute_volume5_value[i],self.minute_volume30_value[i],\
+											self.minute_range_value[i],self.minute_range5_value[i],self.minute_range30_value[i],\
+											self.minute_roc_value[i],self.minute_roc5_value[i],self.minute_roc30_value[i]]
+
+					self.minute_vals[i] = [round(i,3) for i in self.minute_vals[i]]
+
+					print("\nConsole (DP): One Minute ",i, self.minute_vals[i],"\n")
 
 					#print("Length: minute open close:",len(self.minute_open_list[i]),len(self.minute_close_list[i]))
 					#print("Length: volume :",len(self.minute_volume_list[i]),)
 					#print("Length: range high_ low:",len(self.minute_high_list[i]),len(self.minute_low_list[i]))
 
 
-			#self.histo.set_hist(self)
+
 			#TODO
 		#### WRITING BLOCK SAVE TO A CSV FILE ####################
 
