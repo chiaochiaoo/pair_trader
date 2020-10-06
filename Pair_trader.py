@@ -251,50 +251,9 @@ else:
 ### PAIR TRADER MOUDULE  ##############################
 
 
+class pair_UI():
 
-
-#### FUNCTION 1 : COMPUTING PAIR TRADE INFORMATION 
-
-# for std. i need a list of the means. I don't need the list anymore.
-
-
-# CUR_GAP.
-	#STD multiple
-	#STD multiple
-	#STD multiple
-	#STD
-# Volume ratio
-# Correlation 
-# ROC ratio  - On different MA lines. 
-
-# 5 MIN MA  (-60)
-# 15 MIN MA  (-180)
-# 30 MIN MA  (-360)
-# 60 MIN MA  (-720)
-
-# 1 min volume sum?  just a number 
-
-
-
-#pd.to_datetime(t,format='%m/%d/%Y %H:%M')
-
-
-#### FUNCTION 2:  GRAPHING
-
-	
-
-# def report(spy,qqq,sma,std):
-
-# 	n = round(((spy-qqq)-sma)/std,2)
-
-# 	text = ""
-# 	if n >=0:
-# 		text = "+" + str(n) + "STD away from the regression line"
-# 	else:
-# 		text = "-" + str(n) + "STD away from the regression line"
-
-# 	return text
-
+	def __ini__
 
 
 
@@ -594,7 +553,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 				cor15.set_title("Correlation 3 min: Current : "+ str(round(cor_15[-1],2)),fontsize=8)
 
 				cor30.clear()
-				cor30.plot(cur_minute[-30:],cor_30)[-30:]
+				cor30.plot(cur_minute[-30:],cor_30[-30:])
 				cor30.set_yticks(yrange_cor)
 				cor30.set_title("Correlation 15 min: Current : "+ str(round(cor_30[-1],2)),fontsize=8)
 
