@@ -156,9 +156,10 @@ def report(symbol):
     ret += " \n"
     ret +=printer(roc30,"30 minute extreme rate of change on average occur during ")
 
-    text_file = open("Report_"+symbol+".txt", "w")
+    text_file = open("report/Report_"+symbol+".txt", "w")
     text_file.write("REPORT ON {0}\n{1}".format(symbol,ret))
     text_file.close()
+
 #STEP 1, Log in
 if not os.path.exists("report"):
     os.mkdir("report")

@@ -455,8 +455,6 @@ plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, h
 
 def set_hist_vals(S):
 
-	dic = {}
-
 	avg = []
 	std = []
 
@@ -489,6 +487,61 @@ def set_hist_vals(S):
 	std = [round(i,3) for i in std]
 
 	return avg,std
+
+
+def set_same_moment_vals(S):
+
+	avg = []
+	std = []
+
+	now = datetime.datetime.now()
+	t = '{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute))
+	print("UI: Fetching historical at:",t)
+	##lets assume it's 12 hours earlier for test purpose
+	t = chiao.get_min(t)  - 1
+
+	vol1=literal_eval(S.loc[S['timestamp'] == t]["v1d"].values[0])
+	vol1m=S.loc[S['timestamp'] == t]["v1m"].values[0]
+	vol1s=S.loc[S['timestamp'] == t]["v1s"].values[0]
+
+	vol5=literal_eval(S.loc[S['timestamp'] == t]["v5d"].values[0])
+	vol5m=S.loc[S['timestamp'] == t]["v5m"].values[0]
+	vol5s=S.loc[S['timestamp'] == t]["v5s"].values[0]
+
+	vol30=literal_eval(S.loc[S['timestamp'] == t]["v30d"].values[0])
+	vol30m=S.loc[S['timestamp'] == t]["v30d"].values[0]
+	vol30s=S.loc[S['timestamp'] == t]["v30s"].values[0]
+
+	roc=literal_eval(S.loc[S['timestamp'] == t]["rocd"].values[0])
+	rocm=S.loc[S['timestamp'] == t]["rocm"].values[0]
+	rocs=S.loc[S['timestamp'] == t]["rocs"].values[0]
+
+	roc5=literal_eval(S.loc[S['timestamp'] == t]["roc5d"].values[0])
+	roc5m=S.loc[S['timestamp'] == t]["roc5m"].values[0]
+	roc5s=S.loc[S['timestamp'] == t]["roc5s"].values[0]
+
+	roc30=literal_eval(S.loc[S['timestamp'] == t]["roc30d"].values[0])
+	roc30m=S.loc[S['timestamp'] == t]["roc30m"].values[0]
+	roc30s=S.loc[S['timestamp'] == t]["roc30s"].values[0]
+
+
+	r=literal_eval(S.loc[S['timestamp'] == t]["rd"].values[0])
+	rm=S.loc[S['timestamp'] == t]["rm"].values[0]
+	rs=S.loc[S['timestamp'] == t]["rs"].values[0]
+
+	r5=literal_eval(S.loc[S['timestamp'] == t]["r5d"].values[0])
+	r5m=S.loc[S['timestamp'] == t]["r5m"].values[0]
+	r5s=S.loc[S['timestamp'] == t]["r5s"].values[0]
+
+	r30=literal_eval(S.loc[S['timestamp'] == t]["r30d"].values[0])
+	r30m=S.loc[S['timestamp'] == t]["r30m"].values[0]
+	r30s=S.loc[S['timestamp'] == t]["r30s"].values[0]
+
+	avg = [vol1m,vol5m,vol30m,rm,r5m,r30m,rocm,roc5m,roc30m]
+	std = [vol1s,vol5s,vol30s,rs,r5s,r30s,rocs,roc5s,roc30s]
+
+	return avg,std
+	## 
 def appendText(ax,h,v,text,box,break3,info):
 	lst = []
 
@@ -660,7 +713,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 				vol15.clear()
 				vol15.plot(cur_minute,vol_15,"b",label="Volume Ratio",linewidth=1)
-				vol15.plot(cur_minute,tran_ratio_15,"r",label="Transaction Ratio",linewidth=1)
+				vol15.plot(cur_minute,tran_ratio_15,"r",alpha=0.7,label="Transaction Ratio",linewidth=1)
 				vol15.plot(cur_minute,[0.5 for i in range(len(cur_minute))],"c--",label="Middle point",linewidth=1)
 				vol15.set_yticks(yrange)
 
@@ -668,7 +721,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 				vol30.clear()
 				vol30.plot(cur_minute,vol_30,"b",label="Volume Ratio")
-				vol30.plot(cur_minute,tran_ratio_30,"r",label="Transaction Ratio")
+				vol30.plot(cur_minute,tran_ratio_30,"r",alpha=0.7,label="Transaction Ratio")
 				vol30.plot(cur_minute,[0.5 for i in range(len(cur_minute))],"c--",label="Middle point",linewidth=1)
 				vol30.set_yticks(yrange)
 
@@ -781,9 +834,6 @@ def update_timebox(timebox):
 	timebox.set_text("Last evaluation time:"+t)
 ################### ALERT PANNEL ### ############
 
-
-
-
 bbox = {'facecolor': 'white', 'alpha': 0.5, 'pad': 3}
 ax = plt.axes([0.5, 0.5, 0.5,0.5])
 ax.axis('off')
@@ -795,25 +845,30 @@ stext = appendText(ax,0.1,0.7,text1,bbox,True,"SPY Average")
 qtext = appendText(ax,0.3,0.7,text1,bbox,True,"QQQ Average")
 pairtext = appendText(ax,0.55,0.7,text2,bbox,False,"Pair")
 
-stext2 = appendText(ax,0.1,0.2,text1,bbox,True,"SPY \nSame Momenet ")
-qtext2 = appendText(ax,0.3,0.2,text1,bbox,True,"QQQ \nSame Momenet ")
+stext2 = appendText(ax,0.1,0.1,text1,bbox,True,"SPY \nSame Momenet ")
+qtext2 = appendText(ax,0.3,0.1,text1,bbox,True,"QQQ \nSame Momenet ")
 
-timebox = ax.text(0.1, 0.8, "Last evaluation time:")
+timebox = ax.text(0.1, 0.8, "Last evaluation time:",bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': 3})
 
 #### SETTING UP ALERTS SYSTEM. 
-sval = []
-qval = []
+
 S =pd.read_csv('data/SPYstat.csv')
 Q =pd.read_csv('data/QQQstat.csv')
 savg,sstd = set_hist_vals(S)
 qval,qstd = set_hist_vals(Q)
 
 
+savg2,sstd2 =[],[]
+qval2,qstd2 =[],[]
 
 
-##
 
-################################################
+#################################################################################
+
+##### SAME MOMENT COMPARISON #####
+
+
+##################################
 
 
 

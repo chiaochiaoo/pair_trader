@@ -182,7 +182,6 @@ def update(self,d,symbols,lock):
 	
 	vol1=literal_eval(S.loc[S['timestamp'] == t]["v1d"].values[0])
 	vol1m=S.loc[S['timestamp'] == t]["v1m"].values[0]
-
 	vol1s=S.loc[S['timestamp'] == t]["v1s"].values[0]
 
 	vol5=literal_eval(S.loc[S['timestamp'] == t]["v5d"].values[0])
@@ -483,14 +482,14 @@ figs = UI_init(["S","Q"], "b")
 def hello():
 	print("HI")
 
-def main(d,symbols,lock):	
+def main(d):	
 	print("UI start")
-	ani = FuncAnimation(figs,update,fargs=(d,symbols,lock),interval=2000)
+	ani = FuncAnimation(figs,update,fargs=(),interval=2000)
 	plt.tight_layout()
 	plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.45, hspace= 0.45)
 	plt.show()
 
-#main()
+main()
 
 # v1 = f.add_subplot(341)
 # v5 = f.add_subplot(342)
