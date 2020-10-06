@@ -36,11 +36,8 @@ class Data_processor:
 		self.readlock = readlock
 
 
-
-
-
 		# minute counter is in how many loops it will become one minute. 
-		self.minute_counter = 30//interval 
+		self.minute_counter = 60//interval 
 		self.aggregate_counter = 0
 
 		# This is the bin value, gather, and clean after every interval. Used with TOS. 
@@ -218,9 +215,12 @@ class Data_processor:
 		interval = self.interval
 
 		#Sync second. 
-		while True:
+
+
+		print("Console (DP): Synchronizing minutes")
+		while self.tosmode == True:
 			now = datetime.datetime.now()
-			if (now.second>45) or (now.second<15):
+			if (now.second>55) or (now.second<5):
 				break
 
 
@@ -228,14 +228,12 @@ class Data_processor:
 		t = '{}:{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute),  '{:02d}'.format(now.second))
 
 		print("Console (DP): Processing begins at",t)
-		with self.binlock:
-			for i in self.symbols:
+		# with self.binlock:
+		# 	for i in self.symbols:
 
-				print("Console (DP): Processing",i,"transaction counts:",len(self.price[i]),len(self.volume[i]))
-				self.price[i] = []
-				self.volume[i] = []
-		#
-
+		# 		print("Console (DP): Processing",i,"transaction counts:",len(self.price[i]),len(self.volume[i]))
+		# 		self.price[i] = []
+		# 		self.volume[i] = []
 
 		while True:
 

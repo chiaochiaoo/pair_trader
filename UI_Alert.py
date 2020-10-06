@@ -5,12 +5,12 @@ import time
 import matplotlib as mpl
 import pandas as pd
 import numpy as np
+import datetime
 
-
-def appendText(ax,h,text,box,break3,info):
+def appendText(ax,h,v,text,box,break3,info):
 	lst = []
 
-	ax.text(h, 0.8, info)
+	ax.text(h, v, info)
 
 	if break3:
 		for i in range(len(text)):
@@ -19,10 +19,10 @@ def appendText(ax,h,text,box,break3,info):
 				offset =0.02
 			if i >5:
 				offset =0.04
-			lst.append(ax.text(h, 0.8-((i+1)/20)-offset, text[i]+str(0),bbox=box))
+			lst.append(ax.text(h, v-((i+1)/20)-offset, text[i]+str(0),bbox=box))
 	else:
 		for i in range(len(text)):
-			lst.append(ax.text(h, 0.8-((i+1)/15), text[i]+str(0),bbox=box))
+			lst.append(ax.text(h, v-((i+1)/15), text[i]+str(0),bbox=box))
 	return lst
 
 def set_hist_vals(S):
@@ -99,16 +99,20 @@ class UI_Alert():
 		self.fig = plt.figure(figsize=(10,15))
 		self.fig.canvas.set_window_title('ALERT WINDOW')
 		self.bbox = {'facecolor': 'white', 'alpha': 0.5, 'pad': 3}
-		self.ax = plt.axes([0.5, 0, 0.5,0.5])
+		self.ax = plt.axes([0.5, 0.5,0.5,0.5])
 		#self.init = TextBox(self.ax, 'GRAPH CMDs:', initial="")
 		self.ax.axis("off")
 		self.text1 = ["vol1:      ","vol5:       ","vol30:      ","range1:  ","range5:  ","range30: ","roc1:      ","roc5:       ","roc30:      "]
 		self.text2 = ["PastOneMonth: ","PastOneWeek: ","PastOneDay: ","Current:      ","Vol ratio1: ","Tran ratio1 ","Correlation 1 "]
 
+self.time = self.ax.text(0.1, 0.8, "time:"+t,bbox=self.bbox)
+		self.stext = appendText(self.ax,0.1,0.7,self.text1,self.bbox,True,"SPY")
+		self.qtext = appendText(self.ax,0.3,0.7,self.text1,self.bbox,True,"QQQ")
+		self.pairtext = appendText(self.ax,0.55,0.7,self.text2,self.bbox,False,"PAIR")
 
-		self.stext = appendText(self.ax,0.1,self.text1,self.bbox,True,"SPY")
-		self.qtext = appendText(self.ax,0.3,self.text1,self.bbox,True,"QQQ")
-		self.pairtext = appendText(self.ax,0.55,self.text2,self.bbox,False,"PAIR")
+		self.stext2 = appendText(self.ax,0.1,0.2,self.text1,self.bbox,True,"SPY")
+		self.qtext2 = appendText(self.ax,0.3,0.2,self.text1,self.bbox,True,"QQQ")
+		self.pairtext2 = appendText(self.ax,0.55,0.2,self.text2,self.bbox,False,"PAIR")
 
 		
 		S =pd.read_csv('data/SPYstat.csv')

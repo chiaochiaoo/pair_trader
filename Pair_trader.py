@@ -74,12 +74,21 @@ class Pair_trading_processor(Data_processor):
 		t1.start()
 		print("Console (PT): Thread running. Continue:")
 
+
 	def start_function(self):
 
 		print("Console (PT): Pair trading moudule begins. ")
 		super().tos_start()
 
 		interval = self.interval
+
+
+		print("Console (PT): Synchronizing minutes")
+		while self.tosmode == True:
+			now = datetime.datetime.now()
+			if (now.second>55) or (now.second<5):
+				break
+
 		while True:
 
 			current_time = time.time()
@@ -345,14 +354,6 @@ class alert_val():
 
 	def set_pair(self,lst):
 		self.pair=lst[:]
-#current values 
-s= []
-q= []
-
-#pair values 
-p=[]
-
-
 
 ############################################################################
 
@@ -488,10 +489,10 @@ def set_hist_vals(S):
 	std = [round(i,3) for i in std]
 
 	return avg,std
-def appendText(ax,h,text,box,break3,info):
+def appendText(ax,h,v,text,box,break3,info):
 	lst = []
 
-	ax.text(h, 0.8, info)
+	ax.text(h, v, info)
 
 	if break3:
 		for i in range(len(text)):
@@ -500,10 +501,10 @@ def appendText(ax,h,text,box,break3,info):
 				offset =0.02
 			if i >5:
 				offset =0.04
-			lst.append(ax.text(h, 0.8-((i+1)/20)-offset, text[i]+str(0),bbox=box))
+			lst.append(ax.text(h, v-((i+1)/20)-offset, text[i]+str(0),bbox=box))
 	else:
 		for i in range(len(text)):
-			lst.append(ax.text(h, 0.8-((i+1)/15), text[i]+str(0),bbox=box))
+			lst.append(ax.text(h, v-((i+1)/15), text[i]+str(0),bbox=box))
 	return lst
 def update(self,PT:Pair_trading_processor,readlock):
 
@@ -623,7 +624,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 				t = str(cur_d)
 
 
-			d_spread.set_title("Last 24 Hours: "+ t+" stds from Regression",fontsize=8)
+			d_spread.set_title("Last 24 Hours: "+ t+" stds from Regression line",fontsize=8)
 
 
 			#text = report(SPY[-1],QQQ[-1],SMA[-1],STD[-1])
@@ -730,6 +731,8 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 			set_pair_text(pairtext,text2,val_pair)
 
+			update_timebox(timebox)
+
 def check_color(z):
 
 	z=abs(z)
@@ -772,7 +775,14 @@ def set_pair_text(textboxes,texts,vals):
 
 		textboxes[i].set_text(texts[i]+str(cur))
 
+def update_timebox(timebox):
+	now = datetime.datetime.now()
+	t = '{}:{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute),  '{:02d}'.format(now.second))
+	timebox.set_text("Last evaluation time:"+t)
 ################### ALERT PANNEL ### ############
+
+
+
 
 bbox = {'facecolor': 'white', 'alpha': 0.5, 'pad': 3}
 ax = plt.axes([0.5, 0.5, 0.5,0.5])
@@ -781,11 +791,14 @@ ax.axis('off')
 text1 = ["vol1:      ","vol5:       ","vol30:      ","range1:  ","range5:  ","range30: ","roc1:      ","roc5:       ","roc30:      "]
 text2 = ["PastOneMonth: ","PastOneWeek: ","PastOneDay: ","Current_5MA:      ","Current_15MA:      ","Vol ratio1: ","Tran ratio1 ","Correlation 1 "]
 
-stext = appendText(ax,0.1,text1,bbox,True,"SPY.AM")
-qtext = appendText(ax,0.3,text1,bbox,True,"QQQ.NQ")
+stext = appendText(ax,0.1,0.7,text1,bbox,True,"SPY Average")
+qtext = appendText(ax,0.3,0.7,text1,bbox,True,"QQQ Average")
+pairtext = appendText(ax,0.55,0.7,text2,bbox,False,"Pair")
 
-pairtext = appendText(ax,0.55,text2,bbox,False,"Pair")
+stext2 = appendText(ax,0.1,0.2,text1,bbox,True,"SPY \nSame Momenet ")
+qtext2 = appendText(ax,0.3,0.2,text1,bbox,True,"QQQ \nSame Momenet ")
 
+timebox = ax.text(0.1, 0.8, "Last evaluation time:")
 
 #### SETTING UP ALERTS SYSTEM. 
 sval = []
