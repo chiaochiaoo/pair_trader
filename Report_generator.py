@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 import os
 import sys
-import os
+
 
 try:
     import requests
@@ -167,7 +167,6 @@ if not os.path.exists("report"):
 
 
 for i in range(1,len(sys.argv)):
-
 
 	symbol = sys.argv[i]
 	print("Report Generator: downlowding recent data for...",symbol)

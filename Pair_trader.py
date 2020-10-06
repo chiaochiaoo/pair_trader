@@ -5,7 +5,7 @@ import numpy as np
 import datetime
 import Functions as chiao
 from Data_processor import Data_processor
-
+import matplotlib as mpl
 import sys
 import os
 ##########################################
@@ -22,7 +22,7 @@ import matplotlib.dates as mdates
 #############################################
 TESTMODE = False
 REALMODE = True
-
+mpl.rcParams['toolbar'] = 'None' 
 
 # 1. QUESTION IS. HOW DO I FEED THOSE DATA FEED TO UI?
 
@@ -683,15 +683,18 @@ def update(self,PT:Pair_trading_processor,readlock):
 			#text = report(SPY[-1],QQQ[-1],SMA[-1],STD[-1])
 			daily_spread.clear()
 			daily_spread.plot(cur_minute,intra_spread,"r",label="current spread")
-			daily_spread.plot(cur_minute,intra_spread5,"b",label="MA5")
+			daily_spread.plot(cur_minute,intra_spread5,"g",alpha=0.6,label="MA5")
 			daily_spread.fill_between(cur_minute,intra_spread5-2*intra_std,intra_spread5+2*intra_std,alpha=0.23,label="Price gap deviation zone")
 
 			#daily_spread.plot(cur_minute,intra_spread15,"c",label="MA15")
 			
 			if intra_std[-1]!=0:
 				cur_i = round((intra_spread[-1] - intra_spread5[-1])/intra_std[-1],2)
+				cur_i15 =round((intra_spread[-1] - intra_spread15[-1])/intra_std[-1],2)
 			else:
 				cur_i = 0
+				cur_i15 = 0
+
 
 
 			t =""
@@ -700,7 +703,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 			else:
 				t = str(cur_i)
 
-			daily_spread.set_title("Current: "+ t+" stds from Mean",fontsize=8)
+			daily_spread.set_title("Current: "+ t+" stds from SMA5",fontsize=8)
 
 			daily_spread.legend(fontsize=6,loc="upper left")
 
@@ -712,29 +715,29 @@ def update(self,PT:Pair_trading_processor,readlock):
 			if (len(cur_minute)==len(vol_15) and len(vol_15)>5):
 
 				vol15.clear()
-				vol15.plot(cur_minute,vol_15,"b",label="Volume Ratio",linewidth=1)
-				vol15.plot(cur_minute,tran_ratio_15,"r",alpha=0.7,label="Transaction Ratio",linewidth=1)
-				vol15.plot(cur_minute,[0.5 for i in range(len(cur_minute))],"c--",label="Middle point",linewidth=1)
+				vol15.plot(cur_minute[-300:],vol_15[-300:],"b",label="Volume Ratio",linewidth=1)
+				vol15.plot(cur_minute[-300:],tran_ratio_15[-300:],"r",alpha=0.7,label="Transaction Ratio",linewidth=1)
+				vol15.plot(cur_minute[-300:],[0.5 for i in range(len(cur_minute[-300:]))],"c--",label="Middle point",linewidth=1)
 				vol15.set_yticks(yrange)
 
 				vol15.set_title("Volume&Transaction Ratio 1 min: Current : "+ str(round(vol_15[-1],2)),fontsize=8)
 
 				vol30.clear()
-				vol30.plot(cur_minute,vol_30,"b",label="Volume Ratio")
-				vol30.plot(cur_minute,tran_ratio_30,"r",alpha=0.7,label="Transaction Ratio")
-				vol30.plot(cur_minute,[0.5 for i in range(len(cur_minute))],"c--",label="Middle point",linewidth=1)
+				vol30.plot(cur_minute[-300:],vol_30[-300:],"b",label="Volume Ratio")
+				vol30.plot(cur_minute[-300:],tran_ratio_30[-300:],"r",alpha=0.7,label="Transaction Ratio")
+				vol30.plot(cur_minute,[0.5 for i in range(len(cur_minute[-300:]))],"c--",label="Middle point",linewidth=1)
 				vol30.set_yticks(yrange)
 
 				vol30.set_title("Volume&Transaction Ratio 5 min: Current : "+ str(round(vol_30[-1],2)),fontsize=8)
 
 				cor15.clear()
-				cor15.plot(cur_minute[-30:],cor_15[-30:])
+				cor15.plot(cur_minute[-300:],cor_15[-300:])
 
 				cor15.set_yticks(yrange_cor)
 				cor15.set_title("Correlation 3 min: Current : "+ str(round(cor_15[-1],2)),fontsize=8)
 
 				cor30.clear()
-				cor30.plot(cur_minute[-30:],cor_30[-30:])
+				cor30.plot(cur_minute[-300:],cor_30[-300:])
 				cor30.set_yticks(yrange_cor)
 				cor30.set_title("Correlation 15 min: Current : "+ str(round(cor_30[-1],2)),fontsize=8)
 
@@ -778,13 +781,13 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 			#Set the values 
 
-			val_pair = [cur_m,cur_w,cur_d,cur_i,cur_i,val_vol,val_tran,val_cor]
+			val_pair = [cur_m,cur_w,cur_d,cur_i,cur_i15,val_vol,val_tran,val_cor]
 			set_symbol_text(stext,text1,vals["SPY.AM"],savg,sstd)
 			set_symbol_text(qtext,text1,vals["QQQ.NQ"],qval,qstd)
 
 			set_pair_text(pairtext,text2,val_pair)
 
-			update_timebox(timebox)
+			#update_timebox(timebox)
 
 def check_color(z):
 
@@ -825,13 +828,14 @@ def set_pair_text(textboxes,texts,vals):
 
 	for i in range(len(textboxes)):
 		cur = vals[i]
-
 		textboxes[i].set_text(texts[i]+str(cur))
+		if i <5:
+			textboxes[i].set_backgroundcolor(check_color(cur))
 
-def update_timebox(timebox):
-	now = datetime.datetime.now()
-	t = '{}:{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute),  '{:02d}'.format(now.second))
-	timebox.set_text("Last evaluation time:"+t)
+# def update_timebox(timebox):
+# 	now = datetime.datetime.now()
+# 	t = '{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute))
+# 	timebox.set_text("Last evaluation time:"+t)
 ################### ALERT PANNEL ### ############
 
 bbox = {'facecolor': 'white', 'alpha': 0.5, 'pad': 3}
@@ -848,7 +852,7 @@ pairtext = appendText(ax,0.55,0.7,text2,bbox,False,"Pair")
 stext2 = appendText(ax,0.1,0.1,text1,bbox,True,"SPY \nSame Momenet ")
 qtext2 = appendText(ax,0.3,0.1,text1,bbox,True,"QQQ \nSame Momenet ")
 
-timebox = ax.text(0.1, 0.8, "Last evaluation time:",bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': 3})
+#timebox = ax.text(0.1, 0.8, "Last evaluation time:",bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': 3})
 
 #### SETTING UP ALERTS SYSTEM. 
 
