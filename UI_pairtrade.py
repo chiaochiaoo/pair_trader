@@ -1,15 +1,3 @@
-import threading
-import time
-import pandas as pd
-import numpy as np
-import datetime
-import Functions as chiao
-from Data_processor import Data_processor
-
-import sys
-import os
-##########################################
-
 import matplotlib.pyplot as plt 
 from matplotlib.animation import FuncAnimation
 import matplotlib.ticker as mticker
@@ -18,287 +6,34 @@ from matplotlib.widgets import Button
 from matplotlib.dates import DateFormatter
 from matplotlib.ticker import FuncFormatter
 import matplotlib.dates as mdates
+import numpy as np
+import Functions as chiao
+import pandas as pd
 
-#############################################
-TESTMODE = False
-REALMODE = True
 
 
-# 1. QUESTION IS. HOW DO I FEED THOSE DATA FEED TO UI?
+def report(spy,qqq,sma,std):
 
-# 2. QUESTION IS. WHAT DA FUCK AM I CALCULATING 
+	n = round(((spy-qqq)-sma)/std,2)
 
-class Pair_trading_processor(Data_processor):
+	text = ""
+	if n >=0:
+		text = "+" + str(n) + "STD away from the regression line"
+	else:
+		text = "-" + str(n) + "STD away from the regression line"
 
-	# Requires more - Spread, Vol Ratio, and ROC, and Cor. 
-	def __init__(self,symbols,interval,tos_mode,readlock):
-		super().__init__(symbols,interval,tos_mode,readlock)
+	return text
 
-		self.pairs = (symbols[0],symbols[1])
 
-		self.intra_spread = []
-		self.intra_spread_MA5 = []
-		self.intra_spread_MA15 = []
-
-		self.intra_spread_MA5_std = []
-
-		self.vol_ratio_15 = []
-		self.vol_ratio_30 = []
-
-		self.tran_ratio_15 = []
-		self.tran_ratio_30 = []
-
-		self.roc = []
-		self.roc_15 = []
-		self.roc_30 = []
-
-
-		self.cors_10 = []
-		self.cors_30 = []
-
-		
-		self.enable = False
-
-		if len(symbols)!=2:
-			print("Console (PT): Pair trade mode on but Symbol numbers are not 2.")
-
-		if len(symbols)==2:
-			print("Console (PT): Pair trade mode on, Symbols: ",str(self.symbols))	
-			self.enable = True	
-
-
-	def start(self):
-
-		print("Console (PT): Thread created, ready to start")
-		t1 = threading.Thread(target=self.start_function, daemon=True)
-		t1.start()
-		print("Console (PT): Thread running. Continue:")
-
-	def start_function(self):
-
-		print("Console (PT): Pair trading moudule begins. ")
-		super().tos_start()
-
-		interval = self.interval
-		while True:
-
-			current_time = time.time()
-
-			self.aggregate_data()
-
-			lag = (time.time() - current_time)
-			sleep = self.interval
-			if interval*1000-lag> 0 : sleep = (interval*1000-lag)/1000
-			print("\nConsole (PT): Processing for ",round(lag*1000,2),"ms , Sleep for",round(sleep,5),"s \n")
-
-			###if pair trade mode is on, display the info###
-
-			# UI_pairtrade.update(self, self.readlock)
-			print("update graph")
-			time.sleep(sleep)
-
-
-
-
-	def aggregate_data(self):
-
-		super().aggregate_data()
-		now = datetime.datetime.now()
-		t = '{}:{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute),  '{:02d}'.format(now.second))
-		# if there is update, use the newest update. else, use old data...
-		# need:
-		# 1. spread, spread MA5, spread MA15.
-		# 2. roc, roc_ma5, roc_ma15
-		# 3. vol ratio, 1 , 2 
-		# 4. cor  1, 2 
-		#### LOTS OF optimization to be made in here. But for now lets just do stupid. 
-
-		a = self.pairs[0]
-		b = self.pairs[1]
-
-		spread = self.mean_temp[a] - self.mean_temp[b]
-
-		if self.tosmode == TESTMODE:
-			spread += 58
-		spread_ma5 = (sum(self.intra_spread[-59:]) + spread)/(len(self.intra_spread[-59:])+1) 
-		spread_ma15 = (sum(self.intra_spread[-179:]) + spread)/(len(self.intra_spread[-179:])+1)
-
-		roc = (self.mean_temp[a]-self.init_price[a]) - (self.mean_temp[b] - self.init_price[b])
-		roc_ma5 = (sum(self.roc[-59:]) + roc)/(len(self.roc[-59:])+1)
-		roc_ma15 = (sum(self.roc[-179:]) + roc)/(len(self.roc[-179:])+1)
-
-
-		# vol ratio is total vol of 15 min, and 30 min.
-
-		sum_a = sum(self.minute_volume_list[a][-15:])
-		sum_b =  sum(self.minute_volume_list[b][-15:])
-		total_sum = sum_a+sum_b
-
-		vol_ratio_15 = 0.5
-		if total_sum != 0:
-			vol_ratio_15 = sum_a/total_sum
-
-		sum_a =  sum(self.minute_volume_list[a][-30:])
-		sum_b = sum(self.minute_volume_list[b][-30:])
-		total_sum = sum_a+sum_b
-		vol_ratio_30 = 0.5
-		if total_sum != 0:
-			vol_ratio_30 = sum_a/total_sum
-
-		sum_a = self.transaction_temp[a]+ sum(self.cur_transaction_list[a][-179:])
-		sum_b = self.transaction_temp[b]+ sum(self.cur_transaction_list[b][-179:])
-		total_sum = sum_a+sum_b
-		tran_ratio_15 = 0.5
-		if total_sum != 0:
-			tran_ratio_15 = sum_a/total_sum
-		
-
-		sum_a = self.transaction_temp[a]+ sum(self.cur_transaction_list[a][-359:])
-		sum_b = self.transaction_temp[b]+ sum(self.cur_transaction_list[b][-359:])
-		total_sum = sum_a+sum_b
-
-		tran_ratio_30 = 0.5
-
-		if total_sum != 0:
-			tran_ratio_30 = sum_a/total_sum
-
-
-		# correlation.
-		cor_10 = 0
-		cor_30 = 0
-
-		if  len(self.cur_minute_price_list[a]) >= 4:
-			# print("length:",len(self.cur_price_list[a]),len(self.cur_price_list[b]))
-			# print("pass in :",self.cur_price_list[a][-120:],self.cur_price_list[b][-120:])
-			# print("pass in :",self.cur_price_list[a][-120:][:-1],self.cur_price_list[b][-120:][:-1])
-			cor_10 = chiao.cor(self.cur_price_list[a][-120:],self.cur_price_list[b][-120:]) 
-			cor_30 =chiao.cor(self.cur_price_list[a][-360:],self.cur_price_list[b][-360:]) 
-
-
-		# Assign the values to our external read section. 
-		with self.readlock:
-
-			self.cur_time.append(t)
-
-			# for i in self.symbols:
-			# 	self.cur_price[i] = self.mean_temp[i]
-			# 	self.cur_volume[i] =self.volume_sum_temp[i]
-			# 	self.cur_transaction[i] = self.transaction_temp[i]
-
-			# 	self.cur_price_list[i].append(self.mean_temp[i])
-			# 	self.cur_volume_list[i].append(self.volume_sum_temp[i])
-			# 	self.cur_transaction_list[i].append(self.transaction_temp[i])
-
-			#now the update data. 
-			self.intra_spread.append(spread)
-			self.intra_spread_MA5.append(spread_ma5)
-			self.intra_spread_MA5_std.append(np.std(self.intra_spread[-30:]))
-			self.intra_spread_MA15.append(spread_ma15)
-
-			self.vol_ratio_15.append(vol_ratio_15)
-			self.vol_ratio_30.append(vol_ratio_30)
-
-			self.tran_ratio_15.append(tran_ratio_15)
-			self.tran_ratio_30.append(tran_ratio_30)
-
-			self.roc.append(roc)
-			self.roc_15.append(roc_ma5)
-			self.roc_30.append(roc_ma15)
-
-
-			self.cors_10.append(cor_10)
-			self.cors_30.append(cor_30)
-
-		print("Legnth check",len(self.cur_time),len(self.intra_spread),len(self.roc),len(self.cors_10),len(self.vol_ratio_15))
-
-	# integrated graphing conponent. 
-	#def graph(self):
-
-
-if len(sys.argv) ==1:
-	symbols = ["SPY.AM","QQQ.NQ"]
-	readlock = threading.Lock()
-	test = Pair_trading_processor(symbols,5,TESTMODE,readlock)
-	test.start()
-
-else:
-	mode  = sys.argv[1]
-
-	symbols = ["SPY.AM","QQQ.NQ"]
-	readlock = threading.Lock()
-
-	if mode == "t":
-		test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
-		test.start()
-	elif mode ==  "r":
-		test = Pair_trading_processor(symbols,5,REALMODE,readlock)
-		test.start()
-	if mode != "t" and  mode !=  "r":
-		print("Console: Wrong input")
-		os._exit(1)
-	#test = Pair_trading_processor(symbols,3,TESTMODE,readlock)
-
-
-# target=TOS_init, args=(Symbol,Price,Volume), daemon=True
-#t1 = threading.Thread(target=test.start_function,args=(), daemon=True)
-# t1.start()
-#cur_minute = pd.to_datetime(cur_time,format='%H:%M:%S')
-####
-
-
-
-
-### PAIR TRADER MOUDULE  ##############################
-
-
-
-
-#### FUNCTION 1 : COMPUTING PAIR TRADE INFORMATION 
-
-# for std. i need a list of the means. I don't need the list anymore.
-
-
-# CUR_GAP.
-	#STD multiple
-	#STD multiple
-	#STD multiple
-	#STD
-# Volume ratio
-# Correlation 
-# ROC ratio  - On different MA lines. 
-
-# 5 MIN MA  (-60)
-# 15 MIN MA  (-180)
-# 30 MIN MA  (-360)
-# 60 MIN MA  (-720)
-
-# 1 min volume sum?  just a number 
-
-
-
-#pd.to_datetime(t,format='%m/%d/%Y %H:%M')
-
-
-#### FUNCTION 2:  GRAPHING
-
-	
-
-# def report(spy,qqq,sma,std):
-
-# 	n = round(((spy-qqq)-sma)/std,2)
-
-# 	text = ""
-# 	if n >=0:
-# 		text = "+" + str(n) + "STD away from the regression line"
-# 	else:
-# 		text = "-" + str(n) + "STD away from the regression line"
-
-# 	return text
-
-
-
-
-# ############################################################################
+def equidate_ax(fig, ax, dates, fmt="%m-%d"):    
+    N = len(dates)
+    def format_date(index, pos):
+        index = np.clip(int(index + 0.5), 0, N - 1)
+        return dates[index].strftime(fmt)
+    ax.xaxis.set_major_formatter(FuncFormatter(format_date))
+    ax.set_xlabel("dates")
+    fig.autofmt_xdate()
+############################################################################
 
 GAP =pd.read_csv('data/SPYQQQpair.csv')
 
@@ -348,25 +83,15 @@ newd2 = [len(d2)]
 newGAP = [week_GAP[-1]]
 
 
-def equidate_ax(fig, ax, dates, fmt="%m-%d"):    
-    N = len(dates)
-    def format_date(index, pos):
-        index = np.clip(int(index + 0.5), 0, N - 1)
-        return dates[index].strftime(fmt)
-    ax.xaxis.set_major_formatter(FuncFormatter(format_date))
-    ax.set_xlabel("dates")
-    fig.autofmt_xdate()
-
-
 ############################################################################
 
 
 plt.style.use("seaborn-darkgrid")
-f = plt.figure(1,figsize=(10,15))
+f = plt.figure(1,figsize=(8,10))
 f.canvas.set_window_title('SPREAD MONITOR')
 
 
-w_spread = f.add_subplot(521)
+w_spread = f.add_subplot(511)
 
 w_spread.set_title("Intraday Spread - Past one Week",fontsize=8)
 w_spread.plot(d,week_GAP,"r",label="Spread")
@@ -377,7 +102,7 @@ w_spread.tick_params(axis='both', which='major', labelsize=8)
 equidate_ax(f,w_spread,list(week_dates))
 
 
-d_spread = f.add_subplot(523)
+d_spread = f.add_subplot(512)
 
 d_spread.set_title("Intraday Spread - Past one Day",fontsize=8)
 d_spread.plot(d2,d_GAP,"r",label="Spread")
@@ -387,7 +112,7 @@ d_spread.fill_between(d2, d_SMA-2*d_std,d_SMA+2*d_std,alpha=0.23,label="Price ga
 d_spread.tick_params(axis='both', which='major', labelsize=8)
 
 
-daily_spread = f.add_subplot(525)
+daily_spread = f.add_subplot(513)
 daily_spread.set_title("Intraday Spread - Today",fontsize=8)
 daily_spread.tick_params(axis='both', which='major', labelsize=8)
 
@@ -395,27 +120,27 @@ daily_spread.tick_params(axis='both', which='major', labelsize=8)
 yrange = [i/10 +0. for i in range(0,11,2)]
 yrange_cor = [round(i/10 +-1.,2) for i in range(0,21,2)]
 
-vol15 = f.add_subplot(5,5,16)
+vol15 = f.add_subplot(5,3,10)
 vol15.set_title("Volume Ratio, period 1 min",fontsize=8)
 vol15.tick_params(axis='both', which='major', labelsize=8)
 vol15.locator_params(axis='x', nbins=4)
 vol15.set_yticks(yrange)
 
 
-vol30 = f.add_subplot(5,5,17)
+vol30 = f.add_subplot(5,3,11)
 vol30.set_title("Volume Ratio, period 5 min",fontsize=8)
 vol30.tick_params(axis='both', which='major', labelsize=8)
 vol30.locator_params(axis='x', nbins=4)
 vol30.set_ylim([0,1])
 
 
-cor15 = f.add_subplot(5,5,21)
+cor15 = f.add_subplot(5,3,13)
 cor15.set_title("Moving Correlation, period 3 min",fontsize=8)
 cor15.tick_params(axis='both', which='major', labelsize=8)
 cor15.locator_params(axis='x', nbins=6)
 cor15.set_ylim([0,1])
 
-cor30 = f.add_subplot(5,5,22)
+cor30 = f.add_subplot(5,3,14)
 cor30.set_title("Moving Correlation, period 15 min",fontsize=8)
 cor30.tick_params(axis='both', which='major', labelsize=8)
 cor30.locator_params(axis='x', nbins=6)
@@ -444,12 +169,8 @@ props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 
 ###################################################
 
-
 plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace= 0.45)
-
-
-
-def update(self,PT:Pair_trading_processor,readlock):
+def update(self,PT,readlock):
 
 	global dates
 	global GAP
@@ -617,126 +338,10 @@ def update(self,PT:Pair_trading_processor,readlock):
 			# cor30.set_xticks(xtick)
 
 
-ani = FuncAnimation(f,update,fargs=(test,readlock),interval=5000)
 
+def start(test,readlock):
+	global f
+	ani = FuncAnimation(f,update,fargs=(test,readlock),interval=5000)
 
+	plt.show()
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#plt.show()
-
-
