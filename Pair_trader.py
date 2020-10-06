@@ -98,8 +98,6 @@ class Pair_trading_processor(Data_processor):
 			time.sleep(sleep)
 
 
-
-
 	def aggregate_data(self):
 
 		super().aggregate_data()
@@ -252,59 +250,27 @@ else:
 
 
 
-
-#### FUNCTION 1 : COMPUTING PAIR TRADE INFORMATION 
-
-# for std. i need a list of the means. I don't need the list anymore.
-
-
-# CUR_GAP.
-	#STD multiple
-	#STD multiple
-	#STD multiple
-	#STD
-# Volume ratio
-# Correlation 
-# ROC ratio  - On different MA lines. 
-
-# 5 MIN MA  (-60)
-# 15 MIN MA  (-180)
-# 30 MIN MA  (-360)
-# 60 MIN MA  (-720)
-
-# 1 min volume sum?  just a number 
-
-
-
-#pd.to_datetime(t,format='%m/%d/%Y %H:%M')
-
-
-#### FUNCTION 2:  GRAPHING
-
-	
-
-# def report(spy,qqq,sma,std):
-
-# 	n = round(((spy-qqq)-sma)/std,2)
-
-# 	text = ""
-# 	if n >=0:
-# 		text = "+" + str(n) + "STD away from the regression line"
-# 	else:
-# 		text = "-" + str(n) + "STD away from the regression line"
-
-# 	return text
-
-
-
-
 # ############################################################################
 
 GAP =pd.read_csv('data/SPYQQQpair.csv')
 
-week = 960*5
+
 month_dates = pd.to_datetime(GAP["timestamp"],format='%m/%d/%Y %H:%M')
 month_GAP = GAP["price_gap"]
+
+m_dat = np.array([np.float32(i) for i in range(len(month_dates))])
+m_linefit = np.polyfit(m_dat,month_GAP,1)
+m_slope = np.float32(m_linefit[0])
+m_intcep = np.float32(m_linefit[1])
+m_regression_line = m_intcep+m_slope*m_dat
+m_STD = chiao.MovingStd(month_GAP,600)
+m_SMA = chiao.SMA(list(month_GAP),600)
+m_std= np.std(month_GAP)
+m_reg = [m_regression_line[-1]]
+
+
+
+week = 960*5
 week_dates = month_dates[-week:]
 week_GAP = list(month_GAP[-week:])
 
@@ -313,12 +279,9 @@ w_linefit = np.polyfit(w_dat,week_GAP,1)
 w_slope = np.float32(w_linefit[0])
 w_intcep = np.float32(w_linefit[1])
 w_regression_line = w_intcep+w_slope*w_dat
-
 w_STD = chiao.MovingStd(week_GAP,120)
 w_SMA = chiao.SMA(list(week_GAP),120)
-
 w_std= np.std(week_GAP)
-
 w_reg = [w_regression_line[-1]]
 
 
@@ -332,19 +295,28 @@ d_linefit = np.polyfit(d_dat,d_GAP,1)
 d_slope = np.float32(d_linefit[0])
 d_intcep = np.float32(d_linefit[1])
 d_regression_line = d_intcep+d_slope*d_dat
-
-
 d_STD = chiao.MovingStd(d_GAP,30)
 d_SMA = chiao.SMA(list(d_GAP),30)
 d_std = np.std(d_GAP)
-
-
 d_reg = [d_regression_line[-1]]
 
+dm=np.arange(len(month_dates))
 d=np.arange(len(week_dates))
 d2=np.arange(len(d_dates))
+
 newd = [len(d)]
 newd2 = [len(d2)]
+newm = [len(dm)]
+
+
+#optimize month data 
+month_GAP = month_GAP[::4]
+dm = dm[::4]
+m_STD = m_STD[::4]
+m_SMA =m_SMA[::4]
+m_regression_line = m_regression_line[::4]
+
+
 newGAP = [week_GAP[-1]]
 
 
@@ -360,13 +332,46 @@ def equidate_ax(fig, ax, dates, fmt="%m-%d"):
 
 ############################################################################
 
+class alert_val():
+
+	def __init__(self,symbols):
+		self.vals = {}
+		for i in symbols:
+			self.vals[i] = []
+		self.pair = []
+
+	def set_symbol(self,symbol,lst):
+		self.vals[symbol]=lst[:]
+
+	def set_pair(self,lst):
+		self.pair=lst[:]
+#current values 
+s= []
+q= []
+
+#pair values 
+p=[]
+
+
+
+############################################################################
 
 plt.style.use("seaborn-darkgrid")
 f = plt.figure(1,figsize=(10,15))
 f.canvas.set_window_title('SPREAD MONITOR')
 
 
-w_spread = f.add_subplot(521)
+m_spread = f.add_subplot(621)
+
+m_spread.set_title("Intraday Spread - Past one month",fontsize=8)
+m_spread.plot(dm,month_GAP,"r",label="Spread")
+m_spread.plot(dm,m_SMA,"c",label="Spread SMA10")
+m_spread.plot(dm,m_regression_line,"b",label="Regression line",linewidth=1)
+m_spread.fill_between(dm, m_regression_line-2*m_std,m_regression_line+2*m_std,alpha=0.23,label="Price gap deviation zone")
+m_spread.tick_params(axis='both', which='major', labelsize=8)
+equidate_ax(f,m_spread,list(month_dates))
+
+w_spread = f.add_subplot(623)
 
 w_spread.set_title("Intraday Spread - Past one Week",fontsize=8)
 w_spread.plot(d,week_GAP,"r",label="Spread")
@@ -377,7 +382,7 @@ w_spread.tick_params(axis='both', which='major', labelsize=8)
 equidate_ax(f,w_spread,list(week_dates))
 
 
-d_spread = f.add_subplot(523)
+d_spread = f.add_subplot(625)
 
 d_spread.set_title("Intraday Spread - Past one Day",fontsize=8)
 d_spread.plot(d2,d_GAP,"r",label="Spread")
@@ -387,7 +392,7 @@ d_spread.fill_between(d2, d_SMA-2*d_std,d_SMA+2*d_std,alpha=0.23,label="Price ga
 d_spread.tick_params(axis='both', which='major', labelsize=8)
 
 
-daily_spread = f.add_subplot(525)
+daily_spread = f.add_subplot(627)
 daily_spread.set_title("Intraday Spread - Today",fontsize=8)
 daily_spread.tick_params(axis='both', which='major', labelsize=8)
 
@@ -395,27 +400,27 @@ daily_spread.tick_params(axis='both', which='major', labelsize=8)
 yrange = [i/10 +0. for i in range(0,11,2)]
 yrange_cor = [round(i/10 +-1.,2) for i in range(0,21,2)]
 
-vol15 = f.add_subplot(5,5,16)
+vol15 = f.add_subplot(6,4,17)
 vol15.set_title("Volume Ratio, period 1 min",fontsize=8)
 vol15.tick_params(axis='both', which='major', labelsize=8)
 vol15.locator_params(axis='x', nbins=4)
 vol15.set_yticks(yrange)
 
 
-vol30 = f.add_subplot(5,5,17)
+vol30 = f.add_subplot(6,4,18)
 vol30.set_title("Volume Ratio, period 5 min",fontsize=8)
 vol30.tick_params(axis='both', which='major', labelsize=8)
 vol30.locator_params(axis='x', nbins=4)
 vol30.set_ylim([0,1])
 
 
-cor15 = f.add_subplot(5,5,21)
+cor15 = f.add_subplot(6,4,21)
 cor15.set_title("Moving Correlation, period 3 min",fontsize=8)
 cor15.tick_params(axis='both', which='major', labelsize=8)
 cor15.locator_params(axis='x', nbins=6)
 cor15.set_ylim([0,1])
 
-cor30 = f.add_subplot(5,5,22)
+cor30 = f.add_subplot(6,4,22)
 cor30.set_title("Moving Correlation, period 15 min",fontsize=8)
 cor30.tick_params(axis='both', which='major', labelsize=8)
 cor30.locator_params(axis='x', nbins=6)
@@ -445,7 +450,7 @@ props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 ###################################################
 
 
-plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace= 0.45)
+plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace= 0.65)
 
 
 
@@ -465,9 +470,6 @@ def update(self,PT:Pair_trading_processor,readlock):
 		if(len(cur_time)>1):
 
 			cur_minute = pd.to_datetime(cur_time,format='%H:%M:%S')
-			# xtick = cur_time
-			# if len(cur_time)>6:
-			# 	xtick = cur_time[::len(cur_time)//5]
 
 			vol_15 = PT.vol_ratio_15
 			vol_30 = PT.vol_ratio_30
@@ -485,14 +487,40 @@ def update(self,PT:Pair_trading_processor,readlock):
 			tran_ratio_30 = PT.tran_ratio_30
 
 			newGAP.append(intra_spread[-1])
+
 			newd.append(newd[-1]+1)
-
-
 			newd2.append(newd2[-1]+1)
+			newm.append(newm[-1]+1)
+
 			d_reg.append(d_intcep+d_slope*newd2[-1])
-
 			w_reg.append(w_intcep+w_slope*newd[-1])
+			m_reg.append(m_intcep+m_slope*newm[-1])
 
+
+			#GAP.append(PT.init_price["SPY.AM"] -  PT.init_price["QQQ.NQ"])
+			#print("length check start:",len(cur_time),len(vol_15),len(vol_30),len(cor_15),len(cor_30),len(cor_15),len(intra_spread))
+			m_spread.clear()
+			m_spread.plot(dm,month_GAP,"r",label="Spread")
+			m_spread.plot(dm,m_SMA,"c",label="Spread SMobjectA10")
+			m_spread.plot(dm,m_regression_line,"b--",label="Regression line",linewidth=1)
+			m_spread.fill_between(dm, m_SMA-2*m_std,m_SMA+2*m_std,alpha=0.23,label="Price gap deviation zone")
+			m_spread.tick_params(axis='both', which='major', labelsize=8)
+
+			m_spread.plot(newm,newGAP,"blue",label="Spread") 
+			m_spread.plot(newm,m_reg,"b--",alpha=0.5) 
+			#conituation of regression. SMA, bollinger 
+
+
+			cur = round((newGAP[-1] - m_reg[-1])/m_std,2)
+			t =""
+			if cur>=0:
+				t = "+"+str(cur)
+			else:
+				t = "-"+str(cur)
+
+			# How many STD away from Mean?
+			# 
+			m_spread.set_title("Last 1 month: "+ t+" stds from Regression line",fontsize=8)
 			#GAP.append(PT.init_price["SPY.AM"] -  PT.init_price["QQQ.NQ"])
 			#print("length check start:",len(cur_time),len(vol_15),len(vol_30),len(cor_15),len(cor_30),len(cor_15),len(intra_spread))
 			w_spread.clear()
@@ -553,7 +581,10 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 			#daily_spread.plot(cur_minute,intra_spread15,"c",label="MA15")
 			
-			cur = round((intra_spread[-1] - intra_spread5[-1])/intra_std[-1],2)
+			if intra_std[-1]!=0:
+				cur = round((intra_spread[-1] - intra_spread5[-1])/intra_std[-1],2)
+			else:
+				cur = 0
 
 
 			t =""
@@ -584,25 +615,37 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 				vol30.set_title("Volume&Transaction Ratio 5 min: Current : "+ str(round(vol_30[-1],2)),fontsize=8)
 
-
 				cor15.clear()
-				cor15.plot(cur_minute,cor_15)
+				cor15.plot(cur_minute[-30:],cor_15[-30:])
+
 				cor15.set_yticks(yrange_cor)
 				cor15.set_title("Correlation 3 min: Current : "+ str(round(cor_15[-1],2)),fontsize=8)
 
 				cor30.clear()
-				cor30.plot(cur_minute,cor_30)
+				cor30.plot(cur_minute[-30:],cor_30[-30:])
 				cor30.set_yticks(yrange_cor)
 				cor30.set_title("Correlation 15 min: Current : "+ str(round(cor_30[-1],2)),fontsize=8)
+
+
+				# xtick = cur_time[-30:]
+				# if len(xtick)>6:
+				# 	xtick = cur_time[::len(cur_time)//3]
+
+				# vol15.set_xticks(xtick)
+				# vol30.set_xticks(xtick)
+				# cor15.set_xticks(xtick)
+				# cor30.set_xticks(xtick)
 
 				#props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 
 				vol15.legend(fontsize=6,loc="upper left")
 				vol30.legend(fontsize=6,loc="upper left")
 
+				#print("Correlation check:",cor_15,cor_30)
 
 				min_form = DateFormatter("%H:%M")
 				daily_spread.xaxis.set_major_formatter(min_form)
+
 				vol15.xaxis.set_major_formatter(min_form)
 				vol30.xaxis.set_major_formatter(min_form)
 				cor15.xaxis.set_major_formatter(min_form)
