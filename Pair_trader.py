@@ -760,7 +760,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 				vol30.clear()
 				vol30.plot(cur_minute[-300:],vol_30[-300:],"b",label="Volume Ratio")
 				vol30.plot(cur_minute[-300:],tran_ratio_30[-300:],"r",alpha=0.7,label="Transaction Ratio")
-				vol30.plot(cur_minute,[0.5 for i in range(len(cur_minute[-300:]))],"c--",label="Middle point",linewidth=1)
+				vol30.plot(cur_minute[-300:],[0.5 for i in range(len(cur_minute[-300:]))],"c--",label="Middle point",linewidth=1)
 				vol30.set_yticks(yrange)
 
 				vol30.set_title("Volume&Transaction Ratio 5 min: Current : "+ str(round(vol_30[-1],2)),fontsize=8)

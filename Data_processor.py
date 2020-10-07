@@ -36,9 +36,9 @@ class Data_processor:
 		self.readlock = readlock
 
 		# minute counter is in how many loops it will become one minute. 
-		self.minute_counter = interval
-		if tos_mode:
-			self.minute_counter = 60//interval 
+		# self.minute_counter = interval
+		# if tos_mode:
+		self.minute_counter = 60//interval 
 		self.aggregate_counter = 0
 
 		# This is the bin value, gather, and clean after every interval. Used with TOS. 
