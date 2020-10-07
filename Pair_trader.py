@@ -89,6 +89,7 @@ class Pair_trading_processor(Data_processor):
 			if (now.second>55) or (now.second<5):
 				break
 
+		x = 12
 		while True:
 
 			current_time = time.time()
@@ -98,12 +99,14 @@ class Pair_trading_processor(Data_processor):
 			lag = (time.time() - current_time)
 			sleep = self.interval
 			if interval*1000-lag> 0 : sleep = (interval*1000-lag)/1000
-			print("\nConsole (PT): Processing for ",round(lag*1000,2),"ms , Sleep for",round(sleep,5),"s \n")
+
+			if x %12 ==0:
+				print("\nConsole (PT): Processing for ",round(lag*1000,2),"ms , Sleep for",round(sleep,5),"s \n")
 
 			###if pair trade mode is on, display the info###
 
 			# UI_pairtrade.update(self, self.readlock)
-			print("update graph")
+			x +=1 
 			time.sleep(sleep)
 
 
@@ -216,7 +219,7 @@ class Pair_trading_processor(Data_processor):
 			self.cors_10.append(cor_10)
 			self.cors_30.append(cor_30)
 
-		print("Legnth check",len(self.cur_time),len(self.intra_spread),len(self.roc),len(self.cors_10),len(self.vol_ratio_15))
+		#print("Legnth check",len(self.cur_time),len(self.intra_spread),len(self.roc),len(self.cors_10),len(self.vol_ratio_15))
 
 	# integrated graphing conponent. 
 	#def graph(self):
@@ -507,8 +510,10 @@ def check_set(S):
 	if t != current_time:
 		savg2,sstd2 = set_same_moment_vals(S,t)
 		qval2,qstd2 = set_same_moment_vals(Q,t)
-
+		##print("check_set:",savg2)
+		##print("check_set:",qval2)
 	current_time = t
+
 
 
 def set_same_moment_vals(S,t):
@@ -517,7 +522,7 @@ def set_same_moment_vals(S,t):
 	std = []
 
 
-	print("UI: Fetching historical at:",chiao.ts_to_str(t))
+	##print("UI: Fetching historical at:",chiao.ts_to_str(t))
 	##lets assume it's 12 hours earlier for test purpose
 
 
@@ -530,7 +535,7 @@ def set_same_moment_vals(S,t):
 	vol5s=S.loc[S['timestamp'] == t]["v5s"].values[0]
 
 	#vol30=literal_eval(S.loc[S['timestamp'] == t]["v30d"].values[0])
-	vol30m=S.loc[S['timestamp'] == t]["v30d"].values[0]
+	vol30m=S.loc[S['timestamp'] == t]["v30m"].values[0]
 	vol30s=S.loc[S['timestamp'] == t]["v30s"].values[0]
 
 	#roc=literal_eval(S.loc[S['timestamp'] == t]["rocd"].values[0])
@@ -855,9 +860,9 @@ def set_symbol_text(textboxes,texts,vals,means,stds):
 
 	for i in range(len(textboxes)):
 
-		cur = vals[i]
-		mean = means[i]
-		std = stds[i]
+		cur = float(vals[i])
+		mean = float(means[i])
+		std = float(stds[i])
 
 		if cur!=0:
 			z=0
@@ -877,7 +882,7 @@ def set_pair_text(textboxes,texts,vals):
 
 
 	for i in range(len(textboxes)):
-		cur = vals[i]
+		cur = float(vals[i])
 
 		
 		if i <5:

@@ -117,3 +117,9 @@ while True:
 
 
         ## Run every 30 minutes. 
+
+
+
+
+
+# http://api.kibot.com/?action=snapshot&symbol=SPY,QQQ

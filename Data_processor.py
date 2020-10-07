@@ -35,9 +35,10 @@ class Data_processor:
 		self.cur_minute = 0
 		self.readlock = readlock
 
-
 		# minute counter is in how many loops it will become one minute. 
-		self.minute_counter = 60//interval 
+		self.minute_counter = interval
+		if tos_mode:
+			self.minute_counter = 60//interval 
 		self.aggregate_counter = 0
 
 		# This is the bin value, gather, and clean after every interval. Used with TOS. 
@@ -372,8 +373,11 @@ class Data_processor:
 											self.minute_roc_value[i],self.minute_roc5_value[i],self.minute_roc30_value[i]]
 
 					self.minute_vals[i] = [round(i,3) for i in self.minute_vals[i]]
-
-					print("\nConsole (DP): One Minute ",i, self.minute_vals[i],"\n")
+					#self.minute_vals[i] = [5 for i in self.minute_vals[i]]
+					now = datetime.datetime.now()
+					t = '{}:{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute),  '{:02d}'.format(now.second))
+					print("\nConsole (DP): One Minute ",i,t, self.minute_vals[i],"\n")
+					#print("Length check for 30:",len(self.minute_open_list[i]),self.minute_open_list[i])
 
 					#print("Length: minute open close:",len(self.minute_open_list[i]),len(self.minute_close_list[i]))
 					#print("Length: volume :",len(self.minute_volume_list[i]),)
@@ -390,8 +394,8 @@ class Data_processor:
 
 # symbols = ["SPY.AM","QQQ.NQ"]
 # readlock = threading.Lock()
-# #test = Data_processor(symbols,5,TESTMODE,readlock)
-
+# test = Data_processor(symbols,5,TESTMODE,readlock)
+# test.start()
 
 # class hist:
 # 	def __init__(self):
