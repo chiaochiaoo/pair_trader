@@ -489,51 +489,72 @@ def set_hist_vals(S):
 	return avg,std
 
 
-def set_same_moment_vals(S):
+
+current_time = 0
+
+def check_set(S):
+
+	global current_time
+	global savg2
+	global sstd2
+	global qval2
+	global qstd2
+
+	now = datetime.datetime.now()
+	t = '{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute))
+	t = chiao.get_min(t)  - 1
+
+	if t != current_time:
+		savg2,sstd2 = set_same_moment_vals(S,t)
+		qval2,qstd2 = set_same_moment_vals(Q,t)
+
+	current_time = t
+
+
+def set_same_moment_vals(S,t):
 
 	avg = []
 	std = []
 
-	now = datetime.datetime.now()
-	t = '{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute))
-	print("UI: Fetching historical at:",t)
-	##lets assume it's 12 hours earlier for test purpose
-	t = chiao.get_min(t)  - 1
 
-	vol1=literal_eval(S.loc[S['timestamp'] == t]["v1d"].values[0])
+	print("UI: Fetching historical at:",chiao.ts_to_str(t))
+	##lets assume it's 12 hours earlier for test purpose
+
+
+	#vol1=literal_eval(S.loc[S['timestamp'] == t]["v1d"].values[0])
 	vol1m=S.loc[S['timestamp'] == t]["v1m"].values[0]
 	vol1s=S.loc[S['timestamp'] == t]["v1s"].values[0]
 
-	vol5=literal_eval(S.loc[S['timestamp'] == t]["v5d"].values[0])
+	#vol5=literal_eval(S.loc[S['timestamp'] == t]["v5d"].values[0])
 	vol5m=S.loc[S['timestamp'] == t]["v5m"].values[0]
 	vol5s=S.loc[S['timestamp'] == t]["v5s"].values[0]
 
-	vol30=literal_eval(S.loc[S['timestamp'] == t]["v30d"].values[0])
+	#vol30=literal_eval(S.loc[S['timestamp'] == t]["v30d"].values[0])
 	vol30m=S.loc[S['timestamp'] == t]["v30d"].values[0]
 	vol30s=S.loc[S['timestamp'] == t]["v30s"].values[0]
 
-	roc=literal_eval(S.loc[S['timestamp'] == t]["rocd"].values[0])
+	#roc=literal_eval(S.loc[S['timestamp'] == t]["rocd"].values[0])
 	rocm=S.loc[S['timestamp'] == t]["rocm"].values[0]
 	rocs=S.loc[S['timestamp'] == t]["rocs"].values[0]
 
-	roc5=literal_eval(S.loc[S['timestamp'] == t]["roc5d"].values[0])
+	#roc5=literal_eval(S.loc[S['timestamp'] == t]["roc5d"].values[0])
 	roc5m=S.loc[S['timestamp'] == t]["roc5m"].values[0]
 	roc5s=S.loc[S['timestamp'] == t]["roc5s"].values[0]
 
-	roc30=literal_eval(S.loc[S['timestamp'] == t]["roc30d"].values[0])
+	#roc30=literal_eval(S.loc[S['timestamp'] == t]["roc30d"].values[0])
 	roc30m=S.loc[S['timestamp'] == t]["roc30m"].values[0]
 	roc30s=S.loc[S['timestamp'] == t]["roc30s"].values[0]
 
 
-	r=literal_eval(S.loc[S['timestamp'] == t]["rd"].values[0])
+	#r=literal_eval(S.loc[S['timestamp'] == t]["rd"].values[0])
 	rm=S.loc[S['timestamp'] == t]["rm"].values[0]
 	rs=S.loc[S['timestamp'] == t]["rs"].values[0]
 
-	r5=literal_eval(S.loc[S['timestamp'] == t]["r5d"].values[0])
+	#r5=literal_eval(S.loc[S['timestamp'] == t]["r5d"].values[0])
 	r5m=S.loc[S['timestamp'] == t]["r5m"].values[0]
 	r5s=S.loc[S['timestamp'] == t]["r5s"].values[0]
 
-	r30=literal_eval(S.loc[S['timestamp'] == t]["r30d"].values[0])
+	#r30=literal_eval(S.loc[S['timestamp'] == t]["r30d"].values[0])
 	r30m=S.loc[S['timestamp'] == t]["r30m"].values[0]
 	r30s=S.loc[S['timestamp'] == t]["r30s"].values[0]
 
@@ -567,6 +588,15 @@ def update(self,PT:Pair_trading_processor,readlock):
 	global hist_spread
 	global f
 	global props
+
+	global savg2
+	global sstd2
+	global qval2
+	global qstd2
+
+
+	check_set(S)
+	check_set(Q)
 
 	with readlock:
 		
@@ -787,6 +817,10 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 			set_pair_text(pairtext,text2,val_pair)
 
+			set_symbol_text(stext2,text1,vals["SPY.AM"],savg2,sstd2)
+			set_symbol_text(qtext2,text1,vals["QQQ.NQ"],qval2,qstd2)
+
+
 			#update_timebox(timebox)
 
 def check_color(z):
@@ -799,6 +833,22 @@ def check_color(z):
 	elif z>0:
 		return "green"
 	elif z==0:
+		return "white"
+
+def check_color_vol(z):
+	if z>=0.7 or z<0.3:
+		return "red"
+	else:
+		return "white"
+
+def check_color_cor(z):
+	if z>=0.8:
+		return "green"
+	elif z<=0.5 or z>=-0.5:
+		return "yellow"
+	elif z<= -0.7:
+		return "red"	
+	else:
 		return "white"
 
 def set_symbol_text(textboxes,texts,vals,means,stds):
@@ -828,9 +878,21 @@ def set_pair_text(textboxes,texts,vals):
 
 	for i in range(len(textboxes)):
 		cur = vals[i]
-		textboxes[i].set_text(texts[i]+str(cur))
+
+		
 		if i <5:
+			zs =str(cur)
+			if cur>=0: 
+				zs = "+"+str(cur)
+			textboxes[i].set_text(texts[i]+zs+" STDs")
 			textboxes[i].set_backgroundcolor(check_color(cur))
+		if i == 5 or i == 6:
+			textboxes[i].set_text(texts[i]+str(cur))
+			textboxes[i].set_backgroundcolor(check_color_vol(cur))
+		if i == 7:
+			textboxes[i].set_text(texts[i]+str(cur))
+			textboxes[i].set_backgroundcolor(check_color_cor(cur))
+
 
 # def update_timebox(timebox):
 # 	now = datetime.datetime.now()
@@ -860,7 +922,6 @@ S =pd.read_csv('data/SPYstat.csv')
 Q =pd.read_csv('data/QQQstat.csv')
 savg,sstd = set_hist_vals(S)
 qval,qstd = set_hist_vals(Q)
-
 
 savg2,sstd2 =[],[]
 qval2,qstd2 =[],[]
