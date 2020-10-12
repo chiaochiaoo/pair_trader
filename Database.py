@@ -34,12 +34,6 @@ except ImportError:
 # print(t)
 
 #STEP 1, Log in
-if not os.path.exists("data"):
-    os.mkdir("data")
-
-if len(sys.argv)>1:
-    if sys.argv[1] == "a":
-        auto_run()
 
 
 def auto_run():
@@ -139,6 +133,13 @@ def fetch_volume(symbols):
 
         return res
 
+
+if not os.path.exists("data"):
+    os.mkdir("data")
+
+if len(sys.argv)>1:
+    if sys.argv[1] == "a":
+        auto_run()
 
 # http://api.kibot.com/?action=snapshot&symbol=SPY,QQQ
 
