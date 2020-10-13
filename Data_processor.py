@@ -5,6 +5,9 @@ import pandas as pd
 import numpy as np
 import datetime
 import Functions as chiao
+
+import Database
+
 # import UI_Historical
 # import multiprocessing
 #cur_minute = pd.to_datetime(cur_time,format='%H:%M:%S')
@@ -23,7 +26,6 @@ REALMODE = True
 class Data_processor:
 
 	def __init__(self,symbols,interval,tos_mode,readlock):
-
 
 
 		self.symbols = symbols
@@ -51,6 +53,17 @@ class Data_processor:
 		for i in symbols:
 			self.price[i] = []
 			self.volume[i] = []
+
+
+		self.accumulated_volume = {}
+
+		symbols_split =[i.split(".")[0] for i in symbols]
+
+		volumes = Database.fetch_volume(symbols_split)
+		index = 0
+		for i in symbols:
+			self.accumulated_volume[i] = volumes[index]
+			index += 1 
 
 		# This is temporary filed 
 		self.price_temp = {}
@@ -170,11 +183,11 @@ class Data_processor:
 
 
 
-		# A list of vallues contain vol1 ,vol5, vol30, range1,530, roc1,5,30
+		# A list of vallues contain vol1 ,vol5, vol30, volacc, range1,530, roc1,5,30
 		self.minute_vals = {}
 		for i in symbols:
 
-			self.minute_vals[i] = [0,0,0,0,0,0,0,0,0]
+			self.minute_vals[i] = [0,0,0,0,0,0,0,0,0,0]
 		# ERROR CHECKING ?
 
  
@@ -321,7 +334,13 @@ class Data_processor:
 
 				for i in self.symbols:
 					#take the data from cur_minute_price_list and cur_minute_volume_list
+
+
 					self.minute_volume_value[i] =sum(self.cur_minute_volume_list[i]) 
+
+					#add this to the total bin
+					self.accumulated_volume[i] += self.minute_volume_value[i]
+
 					self.minute_volume_list[i].append(self.minute_volume_value[i])
 
 					if len(self.minute_volume_list[i])>=5:
@@ -370,7 +389,7 @@ class Data_processor:
 
 					self.minute_vals[i] = [self.minute_volume_value[i],self.minute_volume5_value[i],self.minute_volume30_value[i],\
 											self.minute_range_value[i],self.minute_range5_value[i],self.minute_range30_value[i],\
-											self.minute_roc_value[i],self.minute_roc5_value[i],self.minute_roc30_value[i]]
+											self.minute_roc_value[i],self.minute_roc5_value[i],self.minute_roc30_value[i],self.accumulated_volume[i]]
 
 					self.minute_vals[i] = [round(i,3) for i in self.minute_vals[i]]
 					#self.minute_vals[i] = [5 for i in self.minute_vals[i]]

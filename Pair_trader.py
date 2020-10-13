@@ -467,9 +467,12 @@ def set_hist_vals(S):
 	avg.append(np.mean(S["v1m"][start:end]))
 	avg.append(np.mean(S["v5m"][start:end]))
 	avg.append(np.mean(S["v30m"][start:end]))
+
+
 	avg.append(np.mean(S["rm"][start:end]))
 	avg.append(np.mean(S["r5m"][start:end]))
 	avg.append(np.mean(S["r30m"][start:end]))
+
 	avg.append(np.mean(S["rocm"][start:end]))
 	avg.append(np.mean(S["roc5m"][start:end]))
 	avg.append(np.mean(S["roc30m"][start:end]))
@@ -477,6 +480,7 @@ def set_hist_vals(S):
 	std.append(np.std(S["v1m"][start:end]))
 	std.append(np.std(S["v5m"][start:end]))
 	std.append(np.std(S["v30m"][start:end]))
+
 
 	std.append(np.std(S["rm"][start:end]))
 	std.append(np.std(S["r5m"][start:end]))
@@ -538,6 +542,9 @@ def set_same_moment_vals(S,t):
 	vol30m=S.loc[S['timestamp'] == t]["v30m"].values[0]
 	vol30s=S.loc[S['timestamp'] == t]["v30s"].values[0]
 
+	volaccm=S.loc[S['timestamp'] == t]["vaccm"].values[0]
+	volaccs=S.loc[S['timestamp'] == t]["vaccs"].values[0]
+
 	#roc=literal_eval(S.loc[S['timestamp'] == t]["rocd"].values[0])
 	rocm=S.loc[S['timestamp'] == t]["rocm"].values[0]
 	rocs=S.loc[S['timestamp'] == t]["rocs"].values[0]
@@ -563,8 +570,8 @@ def set_same_moment_vals(S,t):
 	r30m=S.loc[S['timestamp'] == t]["r30m"].values[0]
 	r30s=S.loc[S['timestamp'] == t]["r30s"].values[0]
 
-	avg = [vol1m,vol5m,vol30m,rm,r5m,r30m,rocm,roc5m,roc30m]
-	std = [vol1s,vol5s,vol30s,rs,r5s,r30s,rocs,roc5s,roc30s]
+	avg = [vol1m,vol5m,vol30m,rm,r5m,r30m,rocm,roc5m,roc30m,volaccm]
+	std = [vol1s,vol5s,vol30s,rs,r5s,r30s,rocs,roc5s,roc30s,volaccs]
 
 	return avg,std
 	## 
@@ -817,13 +824,15 @@ def update(self,PT:Pair_trading_processor,readlock):
 			#Set the values 
 
 			val_pair = [cur_m,cur_w,cur_d,cur_i,cur_i15,val_vol,val_tran,val_cor]
-			set_symbol_text(stext,text1,vals["SPY.AM"],savg,sstd)
-			set_symbol_text(qtext,text1,vals["QQQ.NQ"],qval,qstd)
+			set_symbol_text(stext,text1,vals["SPY.AM"][:-1],savg,sstd)
+			set_symbol_text(qtext,text1,vals["QQQ.NQ"][:-1],qval,qstd)
 
 			set_pair_text(pairtext,text2,val_pair)
 
-			set_symbol_text(stext2,text1,vals["SPY.AM"],savg2,sstd2)
-			set_symbol_text(qtext2,text1,vals["QQQ.NQ"],qval2,qstd2)
+
+			#add accumulated volume to it.
+			set_symbol_text(stext2,text_across_dayss,vals["SPY.AM"],savg2,sstd2)
+			set_symbol_text(qtext2,text_across_dayss,vals["QQQ.NQ"],qval2,qstd2)
 
 
 			#update_timebox(timebox)
@@ -871,7 +880,7 @@ def set_symbol_text(textboxes,texts,vals,means,stds):
 				zs =str(z)
 				if z>=0: 
 					zs = "+"+str(z)
-			if i<3:
+			if i<4:
 				textboxes[i].set_text(texts[i]+zs+" STDs")
 				textboxes[i].set_backgroundcolor(check_color(z))
 			else:
@@ -910,14 +919,17 @@ ax = plt.axes([0.5, 0.5, 0.5,0.5])
 ax.axis('off')
 
 text1 = ["vol1:      ","vol5:       ","vol30:      ","range1:  ","range5:  ","range30: ","roc1:      ","roc5:       ","roc30:      "]
+
+text_across_dayss = ["vol1:      ","vol5:       ","vol30:      ","range1:  ","range5:  ","range30: ","roc1:      ","roc5:       ","roc30:      ","Vol Acc:",]
+
 text2 = ["PastOneMonth: ","PastOneWeek: ","PastOneDay: ","Current_5MA:      ","Current_15MA:      ","Vol ratio1: ","Tran ratio1 ","Correlation 1 "]
 
 stext = appendText(ax,0.1,0.7,text1,bbox,True,"SPY Average")
 qtext = appendText(ax,0.3,0.7,text1,bbox,True,"QQQ Average")
 pairtext = appendText(ax,0.55,0.7,text2,bbox,False,"Pair")
 
-stext2 = appendText(ax,0.1,0.1,text1,bbox,True,"SPY \nSame Momenet ")
-qtext2 = appendText(ax,0.3,0.1,text1,bbox,True,"QQQ \nSame Momenet ")
+stext2 = appendText(ax,0.1,0.1,text_across_dayss,bbox,True,"SPY \nSame Momenet ")
+qtext2 = appendText(ax,0.3,0.1,text_across_dayss,bbox,True,"QQQ \nSame Momenet ")
 
 #timebox = ax.text(0.1, 0.8, "Last evaluation time:",bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': 3})
 
