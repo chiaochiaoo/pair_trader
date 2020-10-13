@@ -880,7 +880,7 @@ def set_symbol_text(textboxes,texts,vals,means,stds):
 				zs =str(z)
 				if z>=0: 
 					zs = "+"+str(z)
-			if i<4:
+			if i<4 or i == len(textboxes)-1:
 				textboxes[i].set_text(texts[i]+zs+" STDs")
 				textboxes[i].set_backgroundcolor(check_color(z))
 			else:
