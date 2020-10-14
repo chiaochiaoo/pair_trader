@@ -70,6 +70,10 @@ def Register(SYMBOLLIST,PORT,Price,Volume):
     
         print("Registering...")
         for i in SYMBOLLIST:
+
+            #"http://localhost:8080/Register?symbol="TSLA.NQ"&region=1&feedtype=L1"
+
+
             postbody = "http://localhost:8080/SetOutput?symbol=" + i + "&region=1&feedtype=TOS&output=" + str(PORT)+"&status=on"
             r= requests.post(postbody)
             if (r.status_code!=200):
