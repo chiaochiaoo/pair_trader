@@ -64,7 +64,7 @@ else:
     plt.tight_layout()
     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace= 0.45)
 
-    plt.savefig('stat_premarket.png')
+    plt.savefig(file+'_stats_premarket.png')
 
     S=S[start:end]
     t = S.keys()[2]
@@ -99,5 +99,5 @@ else:
 
     plt.tight_layout()
     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace= 0.45)
-    plt.savefig('stat_market.png')
+    plt.savefig(file+'_stats_market.png')
     plt.show()
