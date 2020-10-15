@@ -154,7 +154,7 @@ def Portwatcher(SYMBOLLIST,PORT,Price,Volume,Time,Lock):
                 Volume[symbol].append(size)
                 Time[symbol].append(time)
 
-        elif timestamp >= LastTime[symbol]-2 and abs(price-LastPrice[symbol])/LastPrice[symbol]<0.01:
+        elif timestamp >= LastTime[symbol]-2 and abs(price-LastPrice[symbol])/LastPrice[symbol]<0.01 and abs(price-LastPrice[symbol])<1:
 
         	#data_processor(symbol,timestamp//1000,size,price)
 
