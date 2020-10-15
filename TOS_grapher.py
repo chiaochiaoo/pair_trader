@@ -38,9 +38,9 @@ def TOS_init(Symbols,Price,Volume,Time,Lock,Realmode):
         print("Console (TOS): Initializing simulation mode")
         Testmode(Symbols,Price,Volume,Time,Lock)
     else:    
-        if Register(Symbols,4050,Price,Volume):
+        if Register(Symbols,4055,Price,Volume):
             print("Console (TOS): Data receiving begins")
-            Portwatcher(Symbols,4050,Price,Volume,Time,Lock)
+            Portwatcher(Symbols,4055,Price,Volume,Time,Lock)
 
 
 def Testmode(Symbols,Price,Volume,Time,Lock):
