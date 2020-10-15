@@ -8,6 +8,7 @@ import random
 import matplotlib.pyplot as plt 
 from matplotlib.animation import FuncAnimation
 import threading
+import pandas as pd
 
 try:
     import requests
@@ -151,7 +152,7 @@ def Portwatcher(SYMBOLLIST,PORT,Price,Volume,Time,Lock):
             with Lock:
                 Price[symbol].append(price)
                 Volume[symbol].append(size)
-                Time[symbol].append(timestamp_mi)
+                Time[symbol].append(time)
 
         elif timestamp >= LastTime[symbol]-2 and abs(price-LastPrice[symbol])/LastPrice[symbol]<0.01:
 
@@ -161,7 +162,7 @@ def Portwatcher(SYMBOLLIST,PORT,Price,Volume,Time,Lock):
             with Lock:
             	Price[symbol].append(price)
             	Volume[symbol].append(size)
-            	Time[symbol].append(timestamp_mi)
+            	Time[symbol].append(time)
 
         LastTime[symbol] = timestamp
         LastPrice[symbol] = price
@@ -172,11 +173,12 @@ def Portwatcher(SYMBOLLIST,PORT,Price,Volume,Time,Lock):
 
 # teststr= 'LocalTime=11:52:51.495,Message=TOS,MarketTime=11:52:51.911,Symbol=TSLA.NQ,Type=0,Price=443.4900,Size=10,Source=1,Condition=X,Tick=?,Mmid=T,SubMarketId=32,Date=2020-09-15,BuyerId=0,SellerId=0\n'
 # t= find_between(teststr, "MarketTime=", ",")
-# timestamp = get_sec(t[:-4])
-# timestamp_mi = get_milisec(t[:-4], t[-3:])
-# print(timestamp,timestamp_mi)
+# # timestamp = get_sec(t[:-4])
+# # timestamp_mi = get_milisec(t[:-4], t[-3:])
+# # print(timestamp,timestamp_mi)
 
-
+# x= pd.to_datetime([t])
+print(x)
 symbol=["AMZN.NQ"]
 price = {}
 volume = {}
@@ -195,10 +197,12 @@ def update(self):
 		t = time_["AMZN.NQ"][-500:]
 		p = price["AMZN.NQ"][-500:]
 
+	t= pd.to_datetime(t)
+	m_spread.clear()
 	m_spread.plot(t,p)
 
 
-f = plt.figure(1,figsize=(10,15))
+f = plt.figure(1,figsize=(15,10))
 m_spread = f.add_subplot(111)
 
 
