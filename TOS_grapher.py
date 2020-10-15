@@ -178,7 +178,7 @@ def Portwatcher(SYMBOLLIST,PORT,Price,Volume,Time,Lock):
 # # print(timestamp,timestamp_mi)
 
 # x= pd.to_datetime([t])
-print(x)
+
 symbol=["AMZN.NQ"]
 price = {}
 volume = {}
