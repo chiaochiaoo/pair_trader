@@ -186,7 +186,7 @@ price["AMZN.NQ"] =[]
 volume["AMZN.NQ"] =[]
 time_["AMZN.NQ"] =[]
 readlock = threading.Lock()
-tos = threading.Thread(target=TOS_init, args=(symbol,price,volume,time_,readlock,False), daemon=True)
+tos = threading.Thread(target=TOS_init, args=(symbol,price,volume,time_,readlock,True), daemon=True)
 tos.start()
 
 
