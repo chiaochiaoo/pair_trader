@@ -181,8 +181,10 @@ def Portwatcher(SYMBOLLIST,PORT,Price,Volume,Time,Lock):
 # x= pd.to_datetime([t])
 
 symbol = ""
+Period = 0
 if len(sys.argv)>1:
     symbol=sys.argv[1]
+    period = int(sys.argv[2])
 
 
 
@@ -200,8 +202,8 @@ tos.start()
 
 def update(self):
 	with readlock:
-		t = time_[symbol][-1000:]
-		p = price[symbol][-1000:]
+		t = time_[symbol][-period:]
+		p = price[symbol][-period:]
 
 	t= pd.to_datetime(t)
 	m_spread.clear()
