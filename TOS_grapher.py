@@ -200,8 +200,8 @@ tos.start()
 
 def update(self):
 	with readlock:
-		t = time_[symbol][-500:]
-		p = price[symbol][-500:]
+		t = time_[symbol][-1000:]
+		p = price[symbol][-1000:]
 
 	t= pd.to_datetime(t)
 	m_spread.clear()
