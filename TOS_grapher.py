@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import threading
 import pandas as pd
+import sys
 
 try:
     import requests
@@ -179,23 +180,28 @@ def Portwatcher(SYMBOLLIST,PORT,Price,Volume,Time,Lock):
 
 # x= pd.to_datetime([t])
 
-symbol=["AMZN.NQ"]
+symbol = ""
+if len(sys.argv)>1:
+    symbol=sys.argv[1]
+
+
+
 price = {}
 volume = {}
 time_ = {}
 
-price["AMZN.NQ"] =[]
-volume["AMZN.NQ"] =[]
-time_["AMZN.NQ"] =[]
+price[symbol] =[]
+volume[symbol] =[]
+time_[symbol] =[]
 readlock = threading.Lock()
-tos = threading.Thread(target=TOS_init, args=(symbol,price,volume,time_,readlock,True), daemon=True)
+tos = threading.Thread(target=TOS_init, args=([symbol],price,volume,time_,readlock,True), daemon=True)
 tos.start()
 
 
 def update(self):
 	with readlock:
-		t = time_["AMZN.NQ"][-500:]
-		p = price["AMZN.NQ"][-500:]
+		t = time_[symbol][-500:]
+		p = price[symbol][-500:]
 
 	t= pd.to_datetime(t)
 	m_spread.clear()
