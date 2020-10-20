@@ -49,7 +49,8 @@ def Testmode(Symbols,Price,Volume,Lock):
                 # Volume[i].append(c)
                 Price[i].append(random.randint(-10,10))
                 Volume[i].append(random.randint(100,200))
-        time.sleep(0.000000001)
+        x= random.random()*1000
+        time.sleep(0.000000001*x)
 
 def Hello():
     print("Console (TOS): TOS Moudule initializing...")
