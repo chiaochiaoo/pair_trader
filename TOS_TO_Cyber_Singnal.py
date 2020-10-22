@@ -170,18 +170,6 @@ class Data_processor:
 
 		#Sync second. 
 
-
-		print("Console (DP): Synchronizing minutes")
-		while self.tosmode == True:
-			now = datetime.datetime.now()
-			if (now.second>55) or (now.second<5):
-				break
-
-
-				now = datetime.datetime.now()
-				t = '{}:{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute),  '{:02d}'.format(now.second))
-
-				print("Console (DP): Processing begins at",t)
 		# with self.binlock:
 		# 	for i in self.symbols:
 
