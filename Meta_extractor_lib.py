@@ -11,28 +11,28 @@ def get_min(time_str):
 	return int(h) * 60 + int(m)
 
 def ts_to_str(timestamp):
-	
+
 	h= int(timestamp//60)
 	m= int(timestamp%60)
 
-		
+
 	#chekc if they are 1 unit.
-	
+
 	if h//10 == 0:
 		h = "0"+str(h)
 	else:
 		h = str(h)
-		
+
 	if m//10 == 0:
 		m = "0"+str(m)
 	else:
 		m = str(m)
-		
+
 
 	return(h+":"+m)
 
 def IQR(x):
-	
+
 	if len(x)> 5:
 		q75, q25 = np.percentile(x, [75 ,25])
 		iqr = (q75 - q25)*1.5
@@ -41,10 +41,10 @@ def IQR(x):
 		for i in x:
 			if (i <= q75 + iqr) and (i >= q25 - iqr):
 				y.append(i)
-				
+
 		x = y[:]
 		#print(q75,q25,iqr)
-		
+
 	return x
 
 def pre_processor(s):
@@ -61,7 +61,7 @@ def pre_processor(s):
 
 
 
-	#1 st iteration: Append timestamp, range. 
+	#1 st iteration: Append timestamp, range.
 
 	for i in range(len(s)):
 		Timestamps.append(get_min(s["time"][i]))
@@ -70,12 +70,11 @@ def pre_processor(s):
 	#     if s["close"][i]<s["open"][i]:
 	#         c = -1
 	#     R = R*c
-
 		roc = s["close"][i]-s["open"][i]
 		Range.append(R)
 		Roc.append(roc)
 
-	s.insert(2,"timestamp", Timestamps, True) 
+	s.insert(2,"timestamp", Timestamps, True)
 
 	#2 nditeration:  volume 5, volume30, volumeACC
 	acc = 0
@@ -85,7 +84,7 @@ def pre_processor(s):
 			acc = 0
 		acc += s["volume"][i]
 
-		#last 5. 
+		#last 5.
 
 		last_5 = s["timestamp"][i]-5
 		j = i
@@ -95,7 +94,7 @@ def pre_processor(s):
 
 		Close =s["close"][i]
 
-		#iterate backward. 
+		#iterate backward.
 		while j>= 0 and s["timestamp"][j]>last_5:
 			vol_5 += s["volume"][j]
 			highs.append(s["high"][j])
@@ -124,7 +123,7 @@ def pre_processor(s):
 
 		Close =s["close"][i]
 
-		#iterate backward. 
+		#iterate backward.
 		while  j>= 0 and s["timestamp"][j]>last_30:
 			vol_30 += s["volume"][j]
 			highs.append(s["high"][j])
@@ -152,15 +151,15 @@ def pre_processor(s):
 		VolumeAcc.append(acc)
 
 	i = 7
-	s.insert(i,"roc", Roc, True) 
-	s.insert(i+1,"roc5", Roc5, True) 
-	s.insert(i+2,"roc30", Roc30, True) 
-	s.insert(i+3,"range", Range, True) 
+	s.insert(i,"roc", Roc, True)
+	s.insert(i+1,"roc5", Roc5, True)
+	s.insert(i+2,"roc30", Roc30, True)
+	s.insert(i+3,"range", Range, True)
 	s.insert(i+4,"range5", Range5, True)
 	s.insert(i+5,"range30", Range30, True)
-	s.insert(i+7,"volume5", Volume5, True) 
-	s.insert(i+8,"volume30", Volume30, True) 
-	s.insert(i+9,"volumeacc", VolumeAcc, True) 
+	s.insert(i+7,"volume5", Volume5, True)
+	s.insert(i+8,"volume30", Volume30, True)
+	s.insert(i+9,"volumeacc", VolumeAcc, True)
 
 
 def find_between(data, first, last):
@@ -176,16 +175,16 @@ def stat_extractor(argv):
 		print("Stats Extractor: Need to pass in one or multiple file")
 		return []
 		#os._exit(1)
-		
+
 	else:
 
 		file_created = []
 		for i in range(len(argv)):
 			file  = argv[i]
 			symbol = find_between(file,"/",".")
-			start = time.time() 
+			start = time.time()
 			S =pd.read_csv(file,names=["day","time","open","high","low","close","volume"])
-			
+
 			print("Stats Extractor: Processing", file[:-4]," containing minutes:",len(S))
 			#process
 
@@ -219,13 +218,13 @@ def stat_extractor(argv):
 				times = [ts_to_str(i) for i in timestamps]
 				d = pd.DataFrame(timestamps,columns=["timestamp"])
 
-				d.insert(len(d.columns),"time", times, True) 
+				d.insert(len(d.columns),"time", times, True)
 
 
-				# STEP 2.  For each of the item in processing list. Add them to the dataframe in a similar fashion. 
+				# STEP 2.  For each of the item in processing list. Add them to the dataframe in a similar fashion.
 
 				for i in range(len(process_list)):
-				
+
 					mean = [] #Avg
 					distribution = []
 					stds = []
@@ -243,17 +242,17 @@ def stat_extractor(argv):
 							std_ = int(std_)
 						mean.append(mean_)
 						stds.append(std_)
-					
-					d.insert(len(d.columns),names[i]+"m",mean, True) 
-					d.insert(len(d.columns),names[i]+"s",stds, True) 
-					d.insert(len(d.columns),names[i]+"d",distribution, True) 
+
+					d.insert(len(d.columns),names[i]+"m",mean, True)
+					d.insert(len(d.columns),names[i]+"s",stds, True)
+					d.insert(len(d.columns),names[i]+"d",distribution, True)
 
 
 				d.to_csv("data/"+symbol+"stat.csv")
 				end = time.time()
 				print("Stats Extractor:: Meta file CSV export successful, time taken:"+str(round(end-start,2))+" seconds");
 				file_created.append(file[:-4]+"stat.csv")
-				
+
 			else:
 				print("Failed to process file data/",symbol,".txt Please check.")
 

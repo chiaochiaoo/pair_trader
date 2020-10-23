@@ -110,6 +110,60 @@ def auto_run():
         time.sleep(1800)
 
 
+def generate_stats_from_txt():
+
+    f = np.loadtxt("Symbollist/NQLIST.txt", dtype=np.str)
+
+    generate_stats(f)
+
+
+def generate_stats(symbols):
+
+    temp = "data/"
+
+    postbody = "http://api.kibot.com/?action=login&user=sajali26@hotmail.com&password=guupu4upu"
+    r= requests.post(postbody)
+    if r.status_code==200:
+
+        files = []
+
+        for i in symbols:
+
+            symbol = i.split(".")[0]
+            postbody = "http://api.kibot.com/?action=history&symbol="+symbol+"&interval=1&period=30"
+            file = symbol+".txt"
+
+            r= requests.post(postbody)
+            if r.status_code==200:
+                print("Donwload "+symbol+" successful.")
+                t=r.text
+                with open(temp+file, "w") as text_file:
+                    text_file.write(t)
+
+            files.append(temp+file)
+
+    print("All download complete. beginning data extraction. ")
+    Meta_extractor_lib.stat_extractor(files)
+
+
+
+def download(symbols,days,regular):
+
+    symbols = symbols.split(",")
+    postbody = "http://api.kibot.com/?action=login&user=sajali26@hotmail.com&password=guupu4upu"
+    r= requests.post(postbody)
+    for i in symbols:
+        postbody = "http://api.kibot.com/?action=history&symbol="+i+"&interval=1&period="+days+"&regularsession="+regular
+        r= requests.post(postbody)
+        if r.status_code==200:
+            print("Donwload "+i+" successful. Writing to files")
+            r = r.text
+            with open("data/"+i+"_"+days+".txt", "w") as text_file:
+                text_file.write(r)
+
+            print("Writing "+i+" completed.")
+
+
 def fetch_volume(symbols):
 
     postbody = "http://api.kibot.com/?action=login&user=sajali26@hotmail.com&password=guupu4upu"
@@ -141,5 +195,13 @@ if len(sys.argv)>1:
     if sys.argv[1] == "a":
         auto_run()
 
+    if sys.argv[1] == "d":
+
+        download(sys.argv[2],sys.argv[3],sys.argv[4])
+
+    if sys.argv[1] == "s":
+        generate_stats(sys.argv[2].split(","))
+
 # http://api.kibot.com/?action=snapshot&symbol=SPY,QQQ
+
 
