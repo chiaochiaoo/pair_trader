@@ -69,6 +69,7 @@ class Data_processor:
 		self.price_temp = {}
 		self.volume_temp = {}
 		self.mean_temp = {}
+
 		self.volume_sum_temp = {}
 		self.transaction_temp = {}
 
@@ -84,17 +85,15 @@ class Data_processor:
 
 		self.cur_price_list = {}
 		for i in symbols:
-
 			self.cur_price_list[i] = []
 
 		# This is the synchronous value, update upon every interval and for external read. 
-
 
 		self.init_price = {}
 		self.cur_price = {}
 		self.cur_volume = {}
 		self.cur_transaction = {}
-
+		self.cur_percentage_change = {}
 
 		for i in symbols:
 
@@ -102,6 +101,7 @@ class Data_processor:
 			self.cur_price[i] =0
 			self.cur_volume[i] =0
 			self.cur_transaction[i] =0
+			self.cur_percentage_change = 0
 
 		# This is where we keep the original data - for , 30 time period. 
 		self.cur_minute_price_list = {}
@@ -158,7 +158,6 @@ class Data_processor:
 			self.minute_high_list[i] = []
 			self.minute_low_list[i] = []
 
-		#
 
 		self.minute_open_value = {}
 		self.minute_close_value = {}
@@ -315,13 +314,15 @@ class Data_processor:
 		with self.readlock:
 			for i in self.symbols:
 				self.cur_price[i] = self.mean_temp[i]
+				self.cur_percentage_change[i] = (self.cur_price[i]-self.init_price[i])/self.cur_price[i]
 				self.cur_volume[i] =self.volume_sum_temp[i]
 				self.cur_transaction[i] = self.transaction_temp[i]
 				
 				self.cur_price_list[i].append(self.cur_price[i])
+				
 				#i don't need these temporary values for now 
-				self.cur_minute_price_list[i].append(self.cur_price[i])
-				self.cur_minute_volume_list[i].append(self.cur_volume[i])
+				# self.cur_minute_price_list[i].append(self.cur_price[i])
+				# self.cur_minute_volume_list[i].append(self.cur_volume[i])
 				#print("Console (DP): ",i,"minute price count:",len(self.cur_minute_price_list[i]),"minute volume count",len(self.cur_minute_volume_list[i]))
 
 
