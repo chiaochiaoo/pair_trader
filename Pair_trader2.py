@@ -19,6 +19,7 @@ mpl.rcParams['toolbar'] = 'None'
 
 # 2. QUESTION IS. WHAT DA FUCK AM I CALCULATING 
 
+
 class Pair_trading_processor(Data_processor):
 
 	# Requires more - Spread, Vol Ratio, and ROC, and Cor. 
@@ -27,13 +28,18 @@ class Pair_trading_processor(Data_processor):
 
 		self.pairs = (symbols[0],symbols[1])
 
+
+		self.spread =0
+		self.spread5 =0
+		self.spread15 = 0
+
 		self.intra_spread = []
 		self.intra_spread_MA5 = []
 		self.intra_spread_MA15 = []
 
 		self.roc_1 = 0
+		self.roc_5 = 0
 		self.roc_15 = 0
-		self.roc_30 = 0
 
 		self.roc_1_list=[]
 		self.roc_5_list=[]
@@ -92,6 +98,12 @@ class Pair_trading_processor(Data_processor):
 
 			# UI_pairtrade.update(self, self.readlock)
 			x +=1 
+
+			a = self.pairs[0]
+			b = self.pairs[1]
+			print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
+				round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
+				round(self.spread,2),round(self.roc_1,2),"\n")
 			time.sleep(sleep)
 
 
@@ -105,22 +117,23 @@ class Pair_trading_processor(Data_processor):
 		a = self.pairs[0]
 		b = self.pairs[1]
 
-		spread = self.cur_percentage_change[a] - self.cur_percentage_change[b]
+		self.spread = self.cur_percentage_change[a] - self.cur_percentage_change[b]
 
-		spread_ma5 = (sum(self.intra_spread[-300:]) + spread)/(len(self.intra_spread[-300:])+1) 
-		spread_ma15 = (sum(self.intra_spread[-1500:]) + spread)/(len(self.intra_spread[-1500:])+1)
+		self.spread_ma5 = (sum(self.intra_spread[-300:]) + self.spread)/(len(self.intra_spread[-300:])+1) 
+		self.spread_ma15 = (sum(self.intra_spread[-1500:]) + self.spread)/(len(self.intra_spread[-1500:])+1)
 
 		#What if not that time yet.
 
 
-		if len(self.intra_spread)>60:
-			self.roc_1 = self.intra_spread[-60] - spread
+		len_ = min(60, len(self.intra_spread)-1)
+		if len_>0:
+			self.roc_1 = self.intra_spread[-len_] - self.spread
 
-		if len(self.intra_spread)>300:
-			self.roc_5 = self.intra_spread[-300] - spread
+			len_ = min(60, len(self.intra_spread)-1)
+			self.roc_5 = self.intra_spread[-len_] - self.spread
 
-		if len(self.intra_spread)>1500:
-			self.roc_15 = self.intra_spread[-1500] - spread
+			len_ = min(60, len(self.intra_spread)-1)
+			self.roc_15 = self.intra_spread[-len_] - self.spread
 
 
 
@@ -176,9 +189,9 @@ class Pair_trading_processor(Data_processor):
 			self.cur_time.append(t)
 
 			#now the update data. 
-			self.intra_spread.append(spread)
-			self.intra_spread_MA5.append(spread_ma5)
-			self.intra_spread_MA15.append(spread_ma15)
+			self.intra_spread.append(self.spread)
+			self.intra_spread_MA5.append(self.spread_ma5)
+			self.intra_spread_MA15.append(self.spread_ma15)
 
 			self.roc_1_list.append(self.roc_1)
 			self.roc_5_list.append(self.roc_5)
@@ -198,6 +211,8 @@ if len(sys.argv) ==1:
 	readlock = threading.Lock()
 	test = Pair_trading_processor(symbols,1,TESTMODE,readlock)
 	test.start()
+	while True:
+		x=1
 
 else:
 	symbols = sys.argv[1].split(",")

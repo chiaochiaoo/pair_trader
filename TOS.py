@@ -42,15 +42,20 @@ def TOS_init(Symbols,Price,Volume,Lock,Realmode):
 
 def Testmode(Symbols,Price,Volume,Lock):
 
+    lastprice = {}
+    for i in Symbols:
+        lastprice[i] = random.randint(1,10)
+
     while True:
         with Lock:
             for i in Symbols:
                 # Price[i].append(c)
                 # Volume[i].append(c)
-                Price[i].append(random.randint(-10,10))
+                lastprice[i] += random.randint(-5,5)/100
+                Price[i].append(lastprice[i])
                 Volume[i].append(random.randint(100,200))
-        x= random.random()*1000
-        time.sleep(0.000000001*x)
+        #x= random.random()*1000
+        time.sleep(0.2)
 
 def Hello():
     print("Console (TOS): TOS Moudule initializing...")

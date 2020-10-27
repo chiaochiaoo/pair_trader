@@ -101,7 +101,7 @@ class Data_processor:
 			self.cur_price[i] =0
 			self.cur_volume[i] =0
 			self.cur_transaction[i] =0
-			self.cur_percentage_change = 0
+			self.cur_percentage_change[i] = 0
 
 		# This is where we keep the original data - for , 30 time period. 
 		self.cur_minute_price_list = {}
@@ -111,7 +111,7 @@ class Data_processor:
 
 		for i in symbols:
 
-			# this store the movement of all.
+			# this store the second price of one minute. 
 			self.cur_minute_price_list[i] = []
 			self.cur_minute_volume_list[i] = []
 			self.cur_transaction_list[i] = []
@@ -314,12 +314,12 @@ class Data_processor:
 		with self.readlock:
 			for i in self.symbols:
 				self.cur_price[i] = self.mean_temp[i]
-				self.cur_percentage_change[i] = (self.cur_price[i]-self.init_price[i])/self.cur_price[i]
+				self.cur_percentage_change[i] = (self.cur_price[i]-self.init_price[i])/self.init_price[i]
 				self.cur_volume[i] =self.volume_sum_temp[i]
 				self.cur_transaction[i] = self.transaction_temp[i]
 				
 				self.cur_price_list[i].append(self.cur_price[i])
-				
+
 				#i don't need these temporary values for now 
 				# self.cur_minute_price_list[i].append(self.cur_price[i])
 				# self.cur_minute_volume_list[i].append(self.cur_volume[i])
