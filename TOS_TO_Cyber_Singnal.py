@@ -7,7 +7,7 @@ import datetime
 import Functions as chiao
 from datetime import date
 import Database
-
+import sys
 from os import path
 import pyaudio
 import csv
@@ -304,7 +304,7 @@ class Data_processor:
 
 ####### USE.
 
-symbols = ["AMZN.NQ"]
+symbols = sys.argv[1].split(",")
 readlock = threading.Lock()
 #test = Data_processor(symbols,1,TESTMODE,readlock)
 test = Data_processor(symbols,1,REALMODE,readlock)

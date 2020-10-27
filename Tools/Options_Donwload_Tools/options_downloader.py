@@ -69,6 +69,15 @@ def missing_values(res):
         if "openInterest" not in res['contracts']['calls'][i]:
             res['contracts']['calls'][i]["openInterest"]={}
             res['contracts']['calls'][i]["openInterest"]["fmt"] = None
+        if "openInterest" not in res['contracts']['calls'][i]:
+            res['contracts']['calls'][i]["openInterest"]={}
+            res['contracts']['calls'][i]["openInterest"]["fmt"] = None
+        if "openInterest" not in res['contracts']['calls'][i]:
+            res['contracts']['calls'][i]["openInterest"]={}
+            res['contracts']['calls'][i]["openInterest"]["fmt"] = None
+        if "openInterest" not in res['contracts']['calls'][i]:
+            res['contracts']['calls'][i]["openInterest"]={}
+            res['contracts']['calls'][i]["openInterest"]["fmt"] = None
             
             
     for i in range(len(res['contracts']['puts'])):
@@ -79,51 +88,67 @@ def missing_values(res):
             res['contracts']['puts'][i]["openInterest"]={}
             res['contracts']['puts'][i]["openInterest"]["fmt"] = None
 
+
+def try_garb(res,type_):
+
+    if type_ in res:
+        # if a dictionary 
+        if type(res[type_])==type({}):
+            if "fmt" in res[type_]:
+                return res[type_]['fmt']
+            #or just return the first key 
+            else:
+                return res[type_][list(res[type_].keys())[0]]
+        else:
+            return res[type_]
+    else:
+        return None
+
 def add_options_to_list(res,ls):
     missing_values(res)
     for i in range(len(res['contracts']['calls'])):
         ls.append([res['contracts']['calls'][i]["contractSymbol"],\
                       "calls",
-        res['contracts']['calls'][i]["currency"],\
-        res['contracts']['calls'][i]["impliedVolatility"]["fmt"],\
-        res['contracts']['calls'][i]["expiration"]["fmt"],\
-        res['contracts']['calls'][i]["change"]["fmt"],\
-        res['contracts']['calls'][i]["strike"]["fmt"],\
-        res['contracts']['calls'][i]["contractSize"],\
-        res['contracts']['calls'][i]["lastPrice"]["fmt"],\
-        res['contracts']['calls'][i]["inTheMoney"],\
-        res['contracts']['calls'][i]["openInterest"]["fmt"],\
-        res['contracts']['calls'][i]["percentChange"]["fmt"],\
-        res['contracts']['calls'][i]["ask"]["fmt"],\
-        res['contracts']['calls'][i]["bid"]["fmt"],\
-        res['contracts']['calls'][i]["volume"]["fmt"],\
-        res['contracts']['calls'][i]["lastTradeDate"]["fmt"]])
+        try_garb(res['contracts']['calls'][i],"currency"),\
+        try_garb(res['contracts']['calls'][i],"inTheMoney"),\
+        try_garb(res['contracts']['calls'][i],"impliedVolatility"),\
+        try_garb(res['contracts']['calls'][i],"expiration"),\
+        try_garb(res['contracts']['calls'][i],"change"),\
+        try_garb(res['contracts']['calls'][i],"strike"),\
+        try_garb(res['contracts']['calls'][i],"contractSize"),\
+        try_garb(res['contracts']['calls'][i],"lastPrice"),\
+        try_garb(res['contracts']['calls'][i],"openInterest"),\
+        try_garb(res['contracts']['calls'][i],"percentChange"),\
+        try_garb(res['contracts']['calls'][i],"ask"),\
+        try_garb(res['contracts']['calls'][i],"bid"),\
+        try_garb(res['contracts']['calls'][i],"volume"),\
+        try_garb(res['contracts']['calls'][i],"lastTradeDate")])
 
     for i in range(len(res['contracts']['puts'])):
         ls.append([res['contracts']['puts'][i]["contractSymbol"],\
                      "puts",
-        res['contracts']['puts'][i]["currency"],\
-        res['contracts']['puts'][i]["impliedVolatility"]["fmt"],\
-        res['contracts']['puts'][i]["expiration"]["fmt"],\
-        res['contracts']['puts'][i]["change"]["fmt"],\
-        res['contracts']['puts'][i]["strike"]["fmt"],\
-        res['contracts']['puts'][i]["contractSize"],\
-        res['contracts']['puts'][i]["lastPrice"]["fmt"],\
-        res['contracts']['puts'][i]["inTheMoney"],\
-        res['contracts']['puts'][i]["openInterest"]["fmt"],\
-        res['contracts']['puts'][i]["percentChange"]["fmt"],\
-        res['contracts']['puts'][i]["ask"]["fmt"],\
-        res['contracts']['puts'][i]["bid"]["fmt"],\
-        res['contracts']['puts'][i]["volume"]["fmt"],\
-        res['contracts']['puts'][i]["lastTradeDate"]["fmt"]])
+        try_garb(res['contracts']['puts'][i],"currency"),\
+        try_garb(res['contracts']['puts'][i],"inTheMoney"),\
+        try_garb(res['contracts']['puts'][i],"impliedVolatility"),\
+        try_garb(res['contracts']['puts'][i],"expiration"),\
+        try_garb(res['contracts']['puts'][i],"change"),\
+        try_garb(res['contracts']['puts'][i],"strike"),\
+        try_garb(res['contracts']['puts'][i],"contractSize"),\
+        try_garb(res['contracts']['puts'][i],"lastPrice"),\
+        try_garb(res['contracts']['puts'][i],"openInterest"),\
+        try_garb(res['contracts']['puts'][i],"percentChange"),\
+        try_garb(res['contracts']['puts'][i],"ask"),\
+        try_garb(res['contracts']['puts'][i],"bid"),\
+        try_garb(res['contracts']['puts'][i],"volume"),\
+        try_garb(res['contracts']['puts'][i],"lastTradeDate")])
 
 
 
 def get_all_options(symbol):
     
-    cols=['contractSymbol','type','currency', \
+    cols=['contractSymbol','type','currency', 'inTheMoney',  \
           'impliedVolatility', 'expiration', 'change',  \
-          'strike', 'contractSize', 'lastPrice', 'inTheMoney', \
+          'strike', 'contractSize', 'lastPrice',\
           'openInterest', 'percentChange', 'ask', 'bid','volume', 'lastTradeDate', ]
 
     res, dates = get_first_option(symbol)
