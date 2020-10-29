@@ -129,6 +129,9 @@ class Pair_trading_processor(Data_processor):
 
 
 		self.intra_spread = list(c1 - c2)
+
+		self.intra_spread_MA5 = chiao.SMA(self.intra_spread, 5)
+		self.intra_spread_MA15 = chiao.SMA(self.intra_spread, 15)
 		self.cur_minute_list = ts[0][:]
 
 		#Time 
@@ -166,8 +169,8 @@ class Pair_trading_processor(Data_processor):
 				print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
 				round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
 				round(self.spread,5),round(self.roc_1,5),round(self.roc_5,5),round(self.roc_15,5),\
-				self.intra_spread[-10:],\
-				self.cur_minute_list[-10:],"\n")
+				self.intra_spread[-15:],\
+				self.cur_minute_list[-15:],"\n")
 
 			###if pair trade mode is on, display the info###
 
@@ -275,8 +278,8 @@ class Pair_trading_processor(Data_processor):
 
 			if self.aggregate_counter% self.minute_counter == 0:
 				self.intra_spread.append(self.spread)
-				self.intra_spread_MA5.append(self.spread5)
-				self.intra_spread_MA15.append(self.spread15)
+				self.intra_spread_MA5.append(chiao.mean(self.intra_spread[-5:]))
+				self.intra_spread_MA15.append(chiao.mean(self.intra_spread[-15:]))
 
 		#print("Legnth check",len(self.cur_time),len(self.intra_spread),len(self.roc),len(self.cors_10),len(self.vol_ratio_15))
 
@@ -379,6 +382,8 @@ def update(self,PT:Pair_trading_processor,readlock):
 	with readlock:
 		cur_time = PT.cur_minute_list[:]
 		intra_spread = PT.intra_spread[:]
+		spread5 = PT.intra_spread_MA5[:]
+		spread15 = PT.intra_spread_MA15[:]
 
 
 	roc_1 = PT.roc_1
@@ -394,9 +399,11 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 		spread.clear()
 		spread.plot(cur_minute,intra_spread,"r",label="current spread")
+		spread.plot(cur_minute,spread5,"y",label="MA5")
+		spread.plot(cur_minute,spread15,"b",label="MA15")
 		spread.xaxis.set_major_formatter(min_form)
 		spread.yaxis.set_major_formatter(mtick.PercentFormatter())
-
+		spread.legend()
 
 		max_spread_d.clear()
 		max_spread_d.set_title('Cur Spread Distribution')
