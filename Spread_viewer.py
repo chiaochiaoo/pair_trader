@@ -8,6 +8,7 @@ from Data_processor import Data_processor
 import matplotlib as mpl
 import sys
 import os
+import Spread_viewer_function as SVF
 ##########################################
 
 #############################################
@@ -48,13 +49,21 @@ class Pair_trading_processor(Data_processor):
 		self.cors_15 = []
 
 
+		self.max_spread_bin_today = [0]
+		# self.max_spread_bin_weekly = w_dis
+		# self.max_spread_bin_montly = m_dis
+
+		# self.max_spread_1 = roc1
+		# self.max_spread_5 = roc5
+		# self.max_spread_15 = roc15
+
 		# self.vol_ratio_15 = []
 		# self.vol_ratio_30 = []
 
 		# self.tran_ratio_15 = []
 		# self.tran_ratio_30 = []
 
-		
+
 		self.enable = False
 
 		if len(symbols)!=2:
@@ -101,9 +110,9 @@ class Pair_trading_processor(Data_processor):
 
 			a = self.pairs[0]
 			b = self.pairs[1]
-			# print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
-			# 	round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
-			# 	round(self.spread,2),round(self.roc_1,2),"\n")
+			print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
+				round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
+				round(self.spread,2),round(self.roc_1,2),"\n")
 			time.sleep(sleep)
 
 
@@ -172,7 +181,7 @@ class Pair_trading_processor(Data_processor):
 			tran_ratio_15 = 0.5
 			if total_sum != 0:
 				tran_ratio_15 = sum_a/total_sum
-			
+
 
 			sum_a = self.transaction_temp[a]+ sum(self.cur_transaction_list[a][-359:])
 			sum_b = self.transaction_temp[b]+ sum(self.cur_transaction_list[b][-359:])
@@ -243,7 +252,7 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.dates as mdates
 import matplotlib.gridspec as gridspec
 
-
+outlier = dict(linewidth=3, color='darkgoldenrod',marker='o')
 plt.style.use("seaborn-darkgrid")
 f = plt.figure(1,figsize=(10,12))
 f.canvas.set_window_title('SPREAD MONITOR')
@@ -260,40 +269,97 @@ spread.tick_params(axis='both', which='major', labelsize=8)
 spread.set_title('IntraDay Spread')
 spread.xaxis.set_major_formatter(min_form)
 
-max_spread_m = f.add_subplot(gs[1,0])
-max_spread_m.set_title('Max Spread Today')
 
-max_spread_m = f.add_subplot(gs[1,1])
-max_spread_m.set_title('Max Spread Weekly')
+m_dis,w_dis,roc1l,roc5l,roc15l = SVF.find_info(symbols)
+
+
+max_spread_d = f.add_subplot(gs[1,0])
+max_spread_d.set_title('Max Spread Today')
+max_spread_d.boxplot([], flierprops=outlier,vert=False, whis=1)
+
+max_spread_w = f.add_subplot(gs[1,1])
+max_spread_w.set_title('Max Spread Weekly')
+max_spread_w.boxplot(w_dis, flierprops=outlier,vert=False, whis=1)
 
 max_spread_m = f.add_subplot(gs[1,2])
 max_spread_m.set_title('Max Spread Monthly')
+max_spread_m.boxplot(m_dis, flierprops=outlier,vert=False, whis=1)
+
 
 roc1 = f.add_subplot(gs[2,0])
-roc1.set_title('Max Speed 1 min')
+roc1.set_title('Speed 1 min')
+roc1.boxplot(roc1l, flierprops=outlier,vert=False, whis=1.5)
 
 roc5 = f.add_subplot(gs[2,1])
-roc5.set_title('Max Speed 5 min')
+roc5.set_title('Speed 5 min')
+roc5.boxplot(roc5l, flierprops=outlier,vert=False, whis=1.5)
 
 roc15 =f.add_subplot(gs[2,2])
-roc15.set_title('Max Speed 15 min')
-
-
+roc15.set_title('Speed 15 min')
+roc15.boxplot(roc15l, flierprops=outlier,vert=False, whis=1.5)
 
 
 
 def update(self,PT:Pair_trading_processor,readlock):
+
+	global roc1
+	global roc5
+	global roc15
+	global max_spread_d
+	global max_spread_w
+	global max_spread_m
+
 	with readlock:
-		cur_time = PT.cur_time
-
-		if(len(cur_time)>1):
-
-			cur_minute = pd.to_datetime(cur_time,format='%H:%M:%S')
-			intra_spread = PT.intra_spread
-			spread.clear()
-			spread.plot(cur_minute,intra_spread,"r",label="current spread")
+		cur_time = PT.cur_time[:]
+		intra_spread = PT.intra_spread[:]
 
 
+	roc_1 = PT.roc_1
+	roc_5 = PT.roc_5
+	roc_15 = PT.roc_15
+	cur_spread = PT.spread
+	today_spread_dis = PT.max_spread_bin_today
+
+
+
+	if(len(cur_time)>1):
+		cur_minute = pd.to_datetime(cur_time,format='%H:%M:%S')
+
+		spread.clear()
+		spread.plot(cur_minute,intra_spread,"r",label="current spread")
+
+
+
+		max_spread_d.clear()
+		max_spread_d.set_title('Cur Spread Distribution')
+		max_spread_d.boxplot(intra_spread, flierprops=outlier,vert=False, whis=1)
+		max_spread_d.axvline(x=cur_spread,color="r")
+
+		max_spread_w.clear()
+		max_spread_w.set_title('W Spread Distribution')
+		max_spread_w.boxplot(w_dis, flierprops=outlier,vert=False, whis=1)
+		max_spread_w.axvline(x=cur_spread,color="r")
+
+		max_spread_m.clear()
+		max_spread_m.set_title('M Spread Distribution')
+		max_spread_m.boxplot(m_dis, flierprops=outlier,vert=False, whis=1)
+		max_spread_m.axvline(x=cur_spread,color="r")
+
+
+		roc1.clear()
+		roc1.set_title('Speed 1 min')
+		roc1.boxplot(roc1l, flierprops=outlier,vert=False, whis=1.5)
+		roc1.axvline(x=roc_1,color="r")
+
+		roc5.clear()
+		roc5.set_title('Speed 5 min')
+		roc5.axvline(x=roc_5,linewidth=2,color="r")
+		roc5.boxplot(roc5l, flierprops=outlier,vert=False, whis=1.5)
+
+		roc15.clear()
+		roc15.set_title('Speed 15 min')
+		roc15.boxplot(roc15l, flierprops=outlier,vert=False, whis=1.5)
+		roc15.axvline(x=roc_15,linewidth=2,color="r")
 
 
 ani = FuncAnimation(f,update,fargs=(test,readlock),interval=1000)
