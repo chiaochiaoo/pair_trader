@@ -101,9 +101,9 @@ class Pair_trading_processor(Data_processor):
 
 			a = self.pairs[0]
 			b = self.pairs[1]
-			print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
-				round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
-				round(self.spread,2),round(self.roc_1,2),"\n")
+			# print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
+			# 	round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
+			# 	round(self.spread,2),round(self.roc_1,2),"\n")
 			time.sleep(sleep)
 
 
