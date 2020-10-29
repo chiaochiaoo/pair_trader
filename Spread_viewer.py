@@ -208,11 +208,11 @@ class Pair_trading_processor(Data_processor):
 			len_ = min(5, len(self.intra_spread)-1)
 
 			#print(len_,self.intra_spread[-len_],self.spread)
-			self.roc_5 = self.spread- self.intra_spread[-len_] 
+			self.roc_5 = self.spread- self.intra_spread_MA5[-len_] 
 
 			len_ = min(15, len(self.intra_spread)-1)
 			#print(len_,self.intra_spread[-len_],self.spread)
-			self.roc_15 = self.spread-self.intra_spread[-len_] 
+			self.roc_15 = self.spread-self.intra_spread_MA15[-len_] 
 
 
 
