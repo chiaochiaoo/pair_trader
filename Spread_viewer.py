@@ -399,7 +399,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 		spread.clear()
 		spread.plot(cur_minute,intra_spread,"y",label="current spread")
-		spread.plot(cur_minute[-1],cur_spread,"rD",label="current spread")
+		spread.plot(cur_minute[-1],cur_spread,"rD")
 		spread.plot(cur_minute,spread5,"r",label="MA5")
 		spread.plot(cur_minute,spread15,"b",label="MA15")
 		spread.xaxis.set_major_formatter(min_form)
