@@ -118,7 +118,7 @@ def process(S,Q):
 	return j.drop(["time_y","timestamp_y","day_y"],axis=1)
 
 def sharp_change(pair,period,change_value):
-	for i in (period,len(pair)-1):
+	for i in range(period,len(pair)-1):
 		if abs(pair[i] - pair[i-period])>change_value:
 			return True
 
@@ -126,12 +126,19 @@ def sharp_change(pair,period,change_value):
 
 def change_distribution(pair,period):
 	lst = []
-	for i in (period,len(pair)-1):
-		lst.append(pair[i] - pair[i-period])
-	return lst
+	if len(pair)>0:
+		for i in range(period,len(pair)-1):
+			lst.append(pair[i] - pair[i-period])
+		return lst
+	else:
+		return [0,0]
 
 def change_min_max(pair):
-	return (min(pair),max(pair))
+
+	if len(pair)>0:
+		return (min(pair),max(pair))
+	else:
+		return (0,0)
 
 def find_info(symbols):
 
@@ -192,7 +199,7 @@ def find_info(symbols):
 		roc15.append(mi)
 		roc15.append(ma)
 
-	print(len(m_dis))
+	print("Distribution size:",len(m_dis))
 	print(len(w_dis))
 	print(len(roc1))
 	print(len(roc5))
@@ -200,4 +207,4 @@ def find_info(symbols):
 
 	return m_dis,w_dis,roc1,roc5,roc15
 
-# find_info(["SPY.AM","QQQ.NQ"])
+#find_info(["SPY.AM","QQQ.NQ"])

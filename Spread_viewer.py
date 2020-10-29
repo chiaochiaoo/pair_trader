@@ -110,9 +110,9 @@ class Pair_trading_processor(Data_processor):
 
 			a = self.pairs[0]
 			b = self.pairs[1]
-			print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
-				round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
-				round(self.spread,2),round(self.roc_1,2),"\n")
+			# print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
+			# 	round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
+			# 	round(self.spread,2),round(self.roc_1,2),"\n")
 			time.sleep(sleep)
 
 
@@ -251,6 +251,7 @@ from matplotlib.widgets import Button
 from matplotlib.animation import FuncAnimation
 import matplotlib.dates as mdates
 import matplotlib.gridspec as gridspec
+import matplotlib.ticker as mtick
 
 outlier = dict(linewidth=3, color='darkgoldenrod',marker='o')
 plt.style.use("seaborn-darkgrid")
@@ -268,6 +269,7 @@ spread = f.add_subplot(gs[0,:])
 spread.tick_params(axis='both', which='major', labelsize=8)
 spread.set_title('IntraDay Spread')
 spread.xaxis.set_major_formatter(min_form)
+spread.yaxis.set_major_formatter(mtick.PercentFormatter())
 
 
 m_dis,w_dis,roc1l,roc5l,roc15l = SVF.find_info(symbols)
