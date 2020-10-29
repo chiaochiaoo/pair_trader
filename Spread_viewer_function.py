@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 import Database as db
+import json
+import pandas as pd
+from datetime import datetime
+import requests
 
 
 def SMA(lst,n):
@@ -140,6 +144,7 @@ def change_min_max(pair):
 	else:
 		return (0,0)
 
+
 def find_info(symbols):
 
 	#Download the data.
@@ -206,5 +211,30 @@ def find_info(symbols):
 	print(len(roc15))
 
 	return m_dis,w_dis,roc1,roc5,roc15
+
+def fetch_data_yahoo(symbol):
+    url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/v2/get-chart"
+
+    querystring = {"region":"US","interval":"1m","symbol":symbol,"range":"1d"}
+
+    headers = {
+        'x-rapidapi-host': "apidojo-yahoo-finance-v1.p.rapidapi.com",
+        'x-rapidapi-key': "ecb76c89e1mshc1fe02b7259bd58p19ddf6jsnaad53d5c4ecb"
+        }
+
+    response = requests.request("GET", url, headers=headers, params=querystring)
+    res = json.loads(response.text)
+
+    ts =[]
+    for i in res['chart']['result'][0]['timestamp']:
+        ts.append(datetime.fromtimestamp(i).strftime('%H:%M'))
+        
+    start = ts.index("09:30")
+    
+    op = res['chart']['result'][0]['indicators']['quote'][0]["open"][start:]
+    ts = ts[start:]
+    
+    #print(symbol+"missing data downloaded",ts,op)
+    return ts,op
 
 #find_info(["SPY.AM","QQQ.NQ"])

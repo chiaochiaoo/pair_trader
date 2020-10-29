@@ -82,10 +82,64 @@ class Pair_trading_processor(Data_processor):
 		print("Console (PT): Thread running. Continue:")
 
 
+	def fetch_missing_data(self):
+
+		#Set init price.
+
+		#minute price: 9:30 to now.
+
+		#minutes : 9:30 to now. 
+
+		#Nake sure they sync. 
+
+		s = [i[:i.index(".")] for i in self.symbols]
+
+		ts = []
+		ps = []
+		for i in s:
+			timestamp,price = SVF.fetch_data_yahoo(i)
+			ts.append(timestamp[:-2])
+			ps.append(price[:-2])
+
+
+		#MUST SYNC THE DATA.
+		# if len(ts[1]) > len(ts[0]):
+		# 	for i in range(len(ts[1])-len(ts[0])):
+		# 		ps[0].append(ps[0][-1])
+		# 	ts[0] = ts[1][:]
+		# else:
+		# 	for i in range(len(ts[0])-len(ts[1])):
+		# 		ps[1].append(ps[1][-1])
+		# 	ts[1] = ts[0][:]
+
+
+		
+		#Now let's set init.
+		for i in range(len(self.symbols)):
+			self.init_price[self.symbols[i]] = ps[i][0]
+
+		#Spread.
+		c1 = (np.array(ps[0])-ps[0][0])*100/ps[0][0]
+		c2 = (np.array(ps[1])-ps[1][0])*100/ps[1][0]
+
+
+
+		self.intra_spread = list(c1 - c2)
+		self.cur_minute_list = ts[0][:]
+
+		#Time 
+
+
+
+
+
+		#CAlculate init Spread.
+
 	def start_function(self):
 
 		print("Console (PT): Pair trading moudule begins. ")
 		super().tos_start()
+		self.fetch_missing_data()
 
 		interval = self.interval
 
@@ -201,7 +255,7 @@ class Pair_trading_processor(Data_processor):
 			self.cur_time.append(t)
 
 			#now the update data. 
-			self.intra_spread.append(self.spread)
+			#self.intra_spread.append(self.spread)
 			self.intra_spread_MA5.append(self.spread_ma5)
 			self.intra_spread_MA15.append(self.spread_ma15)
 
@@ -209,11 +263,11 @@ class Pair_trading_processor(Data_processor):
 			self.roc_5_list.append(self.roc_5)
 			self.roc_15_list.append(self.roc_15)
 
-			self.cors_5.append(cor_5)
-			self.cors_15.append(cor_15)
+			# self.cors_5.append(cor_5)
+			# self.cors_15.append(cor_15)
 
-		#if self.aggregate_counter% self.minute_counter == 0:
-
+			if self.aggregate_counter% self.minute_counter == 0:
+				self.intra_spread.append(self.spread)
 
 		#print("Legnth check",len(self.cur_time),len(self.intra_spread),len(self.roc),len(self.cors_10),len(self.vol_ratio_15))
 
@@ -271,8 +325,7 @@ b=[1,2,3]
 spread = f.add_subplot(gs[0,:])
 spread.tick_params(axis='both', which='major', labelsize=8)
 spread.set_title('IntraDay Spread')
-spread.xaxis.set_major_formatter(min_form)
-spread.yaxis.set_major_formatter(mtick.PercentFormatter())
+
 
 
 m_dis,w_dis,roc1l,roc5l,roc15l = SVF.find_info(symbols)
@@ -315,7 +368,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 	global max_spread_m
 
 	with readlock:
-		cur_time = PT.cur_time[:]
+		cur_time = PT.cur_minute_list[:]
 		intra_spread = PT.intra_spread[:]
 
 
@@ -328,11 +381,12 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 
 	if(len(cur_time)>1):
-		cur_minute = pd.to_datetime(cur_time,format='%H:%M:%S')
+		cur_minute = pd.to_datetime(cur_time,format='%H:%M')
 
 		spread.clear()
 		spread.plot(cur_minute,intra_spread,"r",label="current spread")
-
+		spread.xaxis.set_major_formatter(min_form)
+		spread.yaxis.set_major_formatter(mtick.PercentFormatter())
 
 
 		max_spread_d.clear()

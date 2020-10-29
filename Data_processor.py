@@ -118,8 +118,6 @@ class Data_processor:
 
 		### field for calculating minute data
 
-
-
 		#current minute volume
 		self.minute_volume_value = {}
 		self.minute_volume5_value = {}
@@ -157,7 +155,6 @@ class Data_processor:
 
 			self.minute_high_list[i] = []
 			self.minute_low_list[i] = []
-
 
 		self.minute_open_value = {}
 		self.minute_close_value = {}
@@ -204,7 +201,7 @@ class Data_processor:
 			with self.binlock:
 				for i in self.symbols:
 					if len(self.price[i])>0:
-						self.init_price[i] = chiao.mean(self.price[i])
+						#self.init_price[i] = chiao.mean(self.price[i])
 						check += 1
 
 		print("Console (DP): All data from each symbols received, data processing begins. ")
@@ -213,12 +210,14 @@ class Data_processor:
 		return True
 
 
-
 	def start(self):
 		print("Console (DP): Thread created, ready to start")
 		t1 = threading.Thread(target=self.start_function, daemon=True)
 		t1.start()
 		print("Console (DP): Thread running. Continue:")
+
+
+
 
 
 	def start_function(self):
@@ -302,7 +301,6 @@ class Data_processor:
 					# std_ = np.std(self.price_temp[i])
 					# clear off the thing. 
 					# d = pd.DataFrame([[t,mean_,volume_,open_,close_,high_,low_,vwap_,std_,tran_]], columns=col)
-
 				else:
 					self.volume_sum_temp[i] = 0
 					self.transaction_temp[i] = 0
@@ -314,7 +312,7 @@ class Data_processor:
 		with self.readlock:
 			for i in self.symbols:
 				self.cur_price[i] = self.mean_temp[i]
-				self.cur_percentage_change[i] = (self.cur_price[i]-self.init_price[i])/self.init_price[i]
+				self.cur_percentage_change[i] = (self.cur_price[i]-self.init_price[i])*100/self.init_price[i]
 				self.cur_volume[i] =self.volume_sum_temp[i]
 				self.cur_transaction[i] = self.transaction_temp[i]
 				
@@ -332,6 +330,10 @@ class Data_processor:
 
 		if self.aggregate_counter% self.minute_counter == 0:
 			with self.readlock:
+
+				t = '{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute))
+				self.cur_minute_list.append(t)
+				self.cur_minute = t
 
 				for i in self.symbols:
 					#take the data from cur_minute_price_list and cur_minute_volume_list
