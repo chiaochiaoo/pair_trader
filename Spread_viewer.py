@@ -90,6 +90,9 @@ class Pair_trading_processor(Data_processor):
 		interval = self.interval
 
 		x = 12
+		a = self.pairs[0]
+		b = self.pairs[1]
+		
 		while True:
 
 			current_time = time.time()
@@ -111,8 +114,7 @@ class Pair_trading_processor(Data_processor):
 			# UI_pairtrade.update(self, self.readlock)
 			x +=1 
 
-			a = self.pairs[0]
-			b = self.pairs[1]
+
 
 			time.sleep(sleep)
 
