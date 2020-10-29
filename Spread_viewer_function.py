@@ -200,4 +200,4 @@ def find_info(symbols):
 
 	return m_dis,w_dis,roc1,roc5,roc15
 
-find_info(["SPY.AM","QQQ.NQ"])
+# find_info(["SPY.AM","QQQ.NQ"])
