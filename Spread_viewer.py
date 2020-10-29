@@ -92,7 +92,7 @@ class Pair_trading_processor(Data_processor):
 		x = 12
 		a = self.pairs[0]
 		b = self.pairs[1]
-		
+
 		while True:
 
 			current_time = time.time()
@@ -107,7 +107,7 @@ class Pair_trading_processor(Data_processor):
 				print("\nConsole (PT): Processing for ",round(lag*1000,2),"ms , Sleep for",round(sleep,5),"s \n")
 				print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
 				round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
-				round(self.spread,2),round(self.roc_1,2),"\n")
+				round(self.spread,5),round(self.roc_1,5),round(self.roc_5,5),round(self.roc_15,5),"\n")
 
 			###if pair trade mode is on, display the info###
 
@@ -132,7 +132,7 @@ class Pair_trading_processor(Data_processor):
 		self.spread = self.cur_percentage_change[a] - self.cur_percentage_change[b]
 
 		self.spread_ma5 = (sum(self.intra_spread[-300:]) + self.spread)/(len(self.intra_spread[-300:])+1) 
-		self.spread_ma15 = (sum(self.intra_spread[-1500:]) + self.spread)/(len(self.intra_spread[-1500:])+1)
+		self.spread_ma15 = (sum(self.intra_spread[-900:]) + self.spread)/(len(self.intra_spread[-900:])+1)
 
 		#What if not that time yet.
 
@@ -141,10 +141,10 @@ class Pair_trading_processor(Data_processor):
 		if len_>0:
 			self.roc_1 = self.intra_spread[-len_] - self.spread
 
-			len_ = min(60, len(self.intra_spread)-1)
+			len_ = min(300, len(self.intra_spread)-1)
 			self.roc_5 = self.intra_spread[-len_] - self.spread
 
-			len_ = min(60, len(self.intra_spread)-1)
+			len_ = min(900, len(self.intra_spread)-1)
 			self.roc_15 = self.intra_spread[-len_] - self.spread
 
 
