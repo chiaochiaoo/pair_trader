@@ -44,7 +44,7 @@ class Pair_trading_processor(Data_processor):
 
 		self.vol_ratio_15 = []
 		self.vol_ratio_30 = []
-
+		
 		self.tran_ratio_15 = []
 		self.tran_ratio_30 = []
 
@@ -56,7 +56,7 @@ class Pair_trading_processor(Data_processor):
 		self.cors_10 = []
 		self.cors_30 = []
 
-		
+
 		self.enable = False
 
 		if len(symbols)!=2:

@@ -230,11 +230,11 @@ class Data_processor:
 		#Sync second. 
 
 
-		print("Console (DP): Synchronizing minutes")
-		while self.tosmode == True:
-			now = datetime.datetime.now()
-			if (now.second>55) or (now.second<5):
-				break
+		# print("Console (DP): Synchronizing minutes")
+		# while self.tosmode == True:
+		# 	now = datetime.datetime.now()
+		# 	if (now.second>55) or (now.second<5):
+		# 		break
 
 
 		now = datetime.datetime.now()
@@ -320,9 +320,9 @@ class Data_processor:
 				
 				self.cur_price_list[i].append(self.cur_price[i])
 
-				#i don't need these temporary values for now 
-				# self.cur_minute_price_list[i].append(self.cur_price[i])
-				# self.cur_minute_volume_list[i].append(self.cur_volume[i])
+
+				self.cur_minute_price_list[i].append(self.cur_price[i])
+				self.cur_minute_volume_list[i].append(self.cur_volume[i])
 				#print("Console (DP): ",i,"minute price count:",len(self.cur_minute_price_list[i]),"minute volume count",len(self.cur_minute_volume_list[i]))
 
 

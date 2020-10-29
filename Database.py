@@ -153,15 +153,16 @@ def download(symbols,days,regular):
     postbody = "http://api.kibot.com/?action=login&user=sajali26@hotmail.com&password=guupu4upu"
     r= requests.post(postbody)
     for i in symbols:
-        postbody = "http://api.kibot.com/?action=history&symbol="+i+"&interval=1&period="+days+"&regularsession="+regular
+        postbody = "http://api.kibot.com/?action=history&symbol="+str(i)+"&interval=1&period="+str(days)+"&regularsession="+str(regular)
         r= requests.post(postbody)
         if r.status_code==200:
             print("Donwload "+i+" successful. Writing to files")
             r = r.text
-            with open("data/"+i+"_"+days+".txt", "w") as text_file:
+            with open("data/"+i+"_"+str(days)+".txt", "w") as text_file:
                 text_file.write(r)
 
             print("Writing "+i+" completed.")
+
 
 
 def fetch_volume(symbols):
