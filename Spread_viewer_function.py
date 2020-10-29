@@ -140,7 +140,7 @@ def find_info(symbols):
 	s = [i[:i.index(".")] for i in symbols]
 	symbols = "".join([i+"," for i in s])[:-1]
 
-	#db.download(symbols,45,1)
+	db.download(symbols,45,1)
 
 	x = s[0]
 	y = s[1]
