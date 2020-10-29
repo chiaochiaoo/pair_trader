@@ -166,8 +166,8 @@ class Pair_trading_processor(Data_processor):
 				print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
 				round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
 				round(self.spread,5),round(self.roc_1,5),round(self.roc_5,5),round(self.roc_15,5),\
-				self.intra_spread[-10],\
-				self.cur_minute_list[-10],"\n")
+				self.intra_spread[-10:],\
+				self.cur_minute_list[-10:],"\n")
 
 			###if pair trade mode is on, display the info###
 
