@@ -130,8 +130,8 @@ class Pair_trading_processor(Data_processor):
 
 		self.intra_spread = list(c1 - c2)
 
-		self.intra_spread_MA5 = chiao.SMA(self.intra_spread, 5)
-		self.intra_spread_MA15 = chiao.SMA(self.intra_spread, 15)
+		self.intra_spread_MA5 = list(chiao.SMA(self.intra_spread, 5))
+		self.intra_spread_MA15 = list(chiao.SMA(self.intra_spread, 15))
 		self.cur_minute_list = ts[0][:]
 
 		#Time 
