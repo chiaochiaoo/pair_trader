@@ -206,8 +206,9 @@ class Pair_trading_processor(Data_processor):
 
 			print(len_,self.intra_spread[-len_],self.spread)
 			self.roc_5 = self.spread- self.intra_spread[-len_] 
-			print(len_,self.intra_spread[-len_],self.spread)
+
 			len_ = min(15, len(self.intra_spread)-1)
+			print(len_,self.intra_spread[-len_],self.spread)
 			self.roc_15 = self.spread-self.intra_spread[-len_] 
 
 
@@ -268,7 +269,7 @@ class Pair_trading_processor(Data_processor):
 			self.roc_1_list.append(self.roc_1)
 			self.roc_5_list.append(self.roc_5)
 			self.roc_15_list.append(self.roc_15)
-
+			self.intra_spread_seconds.append(self.spread)
 			# self.cors_5.append(cor_5)
 			# self.cors_15.append(cor_15)
 
