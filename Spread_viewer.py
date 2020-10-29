@@ -107,14 +107,14 @@ class Pair_trading_processor(Data_processor):
 
 
 		#MUST SYNC THE DATA.
-		# if len(ts[1]) > len(ts[0]):
-		# 	for i in range(len(ts[1])-len(ts[0])):
-		# 		ps[0].append(ps[0][-1])
-		# 	ts[0] = ts[1][:]
-		# else:
-		# 	for i in range(len(ts[0])-len(ts[1])):
-		# 		ps[1].append(ps[1][-1])
-		# 	ts[1] = ts[0][:]
+		if len(ts[1]) > len(ts[0]):
+			for i in range(len(ts[1])-len(ts[0])):
+				ps[0].append(ps[0][-1])
+			ts[0] = ts[1][:]
+		else:
+			for i in range(len(ts[0])-len(ts[1])):
+				ps[1].append(ps[1][-1])
+			ts[1] = ts[0][:]
 
 
 		
@@ -358,7 +358,7 @@ max_spread_m.boxplot(m_dis, flierprops=outlier,vert=False, whis=1)
 
 roc1 = f.add_subplot(gs[2,0])
 roc1.set_title('Speed 1 min')
-roc1.boxplot(roc1l, flierprops=outlier,vert=False, whis=1.5)
+roc1.boxplot(roc1l, flierprops=outlier,vert=False, whis=2.5)
 
 roc5 = f.add_subplot(gs[2,1])
 roc5.set_title('Speed 5 min')
@@ -398,8 +398,9 @@ def update(self,PT:Pair_trading_processor,readlock):
 		cur_minute = pd.to_datetime(cur_time,format='%H:%M')
 
 		spread.clear()
-		spread.plot(cur_minute,intra_spread,"r",label="current spread")
-		spread.plot(cur_minute,spread5,"y",label="MA5")
+		spread.plot(cur_minute,intra_spread,"y",label="current spread")
+		spread.plot(cur_minute[-1],cur_spread,"rD",label="current spread")
+		spread.plot(cur_minute,spread5,"r",label="MA5")
 		spread.plot(cur_minute,spread15,"b",label="MA15")
 		spread.xaxis.set_major_formatter(min_form)
 		spread.yaxis.set_major_formatter(mtick.PercentFormatter())

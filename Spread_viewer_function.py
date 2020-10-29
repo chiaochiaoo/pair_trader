@@ -129,20 +129,13 @@ def sharp_change(pair,period,change_value):
 	return False
 
 def change_distribution(pair,period):
-	lst = []
-	if len(pair)>0:
-		for i in range(period,len(pair)-1):
-			lst.append(pair[i] - pair[i-period])
-		return lst
-	else:
-		return [0,0]
+    lst = []
+    for i in (period,len(pair)-1):
+        lst.append(pair[i] - pair[i-period])
+    return lst
 
 def change_min_max(pair):
-
-	if len(pair)>0:
-		return (min(pair),max(pair))
-	else:
-		return (0,0)
+    return (min(pair),max(pair))
 
 
 def find_info(symbols):
@@ -167,42 +160,47 @@ def find_info(symbols):
 	m_dis=[]
 	for day in days:
 		gap = p.loc[(p["day_x"]==day)]["price_gap"]
-		mi,ma=change_min_max(gap)
-		m_dis.append(mi)
-		m_dis.append(ma)
+		if len(gap)>1:
+			mi,ma=change_min_max(gap)
+			m_dis.append(mi)
+			m_dis.append(ma)
 
 	w_dis=[]
 	for day in days[-5:]:
 		gap = p.loc[(p["day_x"]==day)]["price_gap"]
-		mi,ma=change_min_max(gap)
-		w_dis.append(mi)
-		w_dis.append(ma)
+		if len(gap)>1:
+			mi,ma=change_min_max(gap)
+			w_dis.append(mi)
+			w_dis.append(ma)
 
 	roc1 = []
 	for day in days:
 		gap = p.loc[(p["day_x"]==day)]["price_gap"]
-		ls = change_distribution(gap.tolist(),1)
-		mi,ma=change_min_max(ls)
-		roc1.append(mi)
-		roc1.append(ma)
+		if len(gap)>1:
+			ls = change_distribution(gap.tolist(),1)
+			mi,ma=change_min_max(ls)
+			roc1.append(mi)
+			roc1.append(ma)
 
 
 	roc5 = []
 	for day in days:
 		gap = p.loc[(p["day_x"]==day)]["price_gap"]
-		ls = change_distribution(gap.tolist(),5)
-		mi,ma=change_min_max(ls)
-		roc5.append(mi)
-		roc5.append(ma)
+		if len(gap)>1:
+			ls = change_distribution(SMA(gap.tolist(),5),5)
+			mi,ma=change_min_max(ls)
+			roc5.append(mi)
+			roc5.append(ma)
 
 
 	roc15 = []
 	for day in days:
 		gap = p.loc[(p["day_x"]==day)]["price_gap"]
-		ls = change_distribution(gap.tolist(),15)
-		mi,ma=change_min_max(ls)
-		roc15.append(mi)
-		roc15.append(ma)
+		if len(gap)>1:
+			ls = change_distribution(SMA(gap.tolist(),15),15)
+			mi,ma=change_min_max(ls)
+			roc15.append(mi)
+			roc15.append(ma)
 
 	print("Distribution size:",len(m_dis))
 	print(len(w_dis))
@@ -238,3 +236,7 @@ def fetch_data_yahoo(symbol):
     return ts,op
 
 #find_info(["SPY.AM","QQQ.NQ"])
+# symbols=["SPY.AM","QQQ.NQ"]
+# m_dis,w_dis,roc1l,roc5l,roc15l = find_info(symbols)
+
+# print(m_dis,"\n",w_dis,"\n",roc1l,"\n",roc5l,"\n",roc15l)
