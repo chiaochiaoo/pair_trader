@@ -199,14 +199,16 @@ class Pair_trading_processor(Data_processor):
 
 		if len(self.intra_spread_seconds)>0:
 			len_ = min(60, len(self.intra_spread_seconds)-1)
-			self.roc_1 = self.intra_spread_seconds[-len_] - self.spread
+			self.roc_1 = self.spread-self.intra_spread_seconds[-len_] 
 
 		if len(self.intra_spread)>0:			
 			len_ = min(5, len(self.intra_spread)-1)
-			self.roc_5 = self.intra_spread[-len_] - self.spread
 
+			print(len_,self.intra_spread[-len_],self.spread)
+			self.roc_5 = self.spread- self.intra_spread[-len_] 
+			print(len_,self.intra_spread[-len_],self.spread)
 			len_ = min(15, len(self.intra_spread)-1)
-			self.roc_15 = self.intra_spread[-len_] - self.spread
+			self.roc_15 = self.spread-self.intra_spread[-len_] 
 
 
 
