@@ -123,6 +123,8 @@ class Pair_trading_processor(Data_processor):
 			self.init_price[self.symbols[i]] = ps[i][0]
 
 		#Spread.
+		# print(ps[0])
+		# print(ps[1])
 		c1 = (np.array(ps[0])-ps[0][0])*100/ps[0][0]
 		c2 = (np.array(ps[1])-ps[1][0])*100/ps[1][0]
 
@@ -399,7 +401,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 		spread.clear()
 		spread.plot(cur_minute,intra_spread,"y",label="current spread")
-		spread.plot(cur_minute[-1],cur_spread,"rD")
+		spread.plot(cur_minute[-1],cur_spread,"r^")
 		spread.plot(cur_minute,spread5,"r",label="MA5")
 		spread.plot(cur_minute,spread15,"b",label="MA15")
 		spread.xaxis.set_major_formatter(min_form)

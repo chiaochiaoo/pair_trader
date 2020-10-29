@@ -231,6 +231,12 @@ def fetch_data_yahoo(symbol):
     
     op = res['chart']['result'][0]['indicators']['quote'][0]["open"][start:]
     ts = ts[start:]
+
+    #clean the none type 
+
+    for i in range(len(op)):
+	    if op[i] ==None:
+	        op[i] = op[i-1]
     
     #print(symbol+"missing data downloaded",ts,op)
     return ts,op
