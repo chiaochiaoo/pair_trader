@@ -102,6 +102,9 @@ class Pair_trading_processor(Data_processor):
 
 			if x %12 ==0:
 				print("\nConsole (PT): Processing for ",round(lag*1000,2),"ms , Sleep for",round(sleep,5),"s \n")
+				print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
+				round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
+				round(self.spread,2),round(self.roc_1,2),"\n")
 
 			###if pair trade mode is on, display the info###
 
@@ -110,9 +113,7 @@ class Pair_trading_processor(Data_processor):
 
 			a = self.pairs[0]
 			b = self.pairs[1]
-			# print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
-			# 	round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
-			# 	round(self.spread,2),round(self.roc_1,2),"\n")
+
 			time.sleep(sleep)
 
 
