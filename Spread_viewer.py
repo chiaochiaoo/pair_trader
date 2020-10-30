@@ -408,6 +408,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 	if(len(cur_time)>1):
 		cur_minute = pd.to_datetime(cur_time,format='%H:%M')
+		cur_second = pd.to_datetime(cur_second,format='%H:%M:%S')
 
 		spread.clear()
 		spread.plot(cur_minute,intra_spread,"y",label="current spread")
@@ -421,6 +422,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 		m1.clear()
 		m1.plot(cur_second,min1,"y",label="current spread")
 		m1.xaxis.set_major_formatter(sec_form)
+		m1.tick_params(axis='both', which='major', labelsize=8)
 
 		max_spread_d.clear()
 		max_spread_d.set_title('Cur Spread Distribution')
