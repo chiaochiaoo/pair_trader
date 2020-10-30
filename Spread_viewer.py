@@ -331,6 +331,8 @@ plt.style.use("seaborn-darkgrid")
 f = plt.figure(1,figsize=(10,8))
 f.canvas.set_window_title('SPREAD MONITOR')
 min_form = DateFormatter("%H:%M")
+sec_form = DateFormatter("%M:%S")
+
 gs = f.add_gridspec(4, 3)
 
 a=[1,2,1]
@@ -392,8 +394,8 @@ def update(self,PT:Pair_trading_processor,readlock):
 		spread5 = PT.intra_spread_MA5[:]
 		spread15 = PT.intra_spread_MA15[:]
 
-		cur_second = PT.cur_time[:]
-		min1 = PT.roc_1_list[:]
+		cur_second = PT.cur_time[-600:]
+		min1 = PT.roc_1_list[-600:]
 
 
 	roc_1 = PT.roc_1
@@ -418,7 +420,7 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 		m1.clear()
 		m1.plot(cur_second,min1,"y",label="current spread")
-		m1.xaxis.set_major_formatter(min_form)
+		m1.xaxis.set_major_formatter(sec_form)
 
 		max_spread_d.clear()
 		max_spread_d.set_title('Cur Spread Distribution')
