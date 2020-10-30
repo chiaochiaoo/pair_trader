@@ -168,11 +168,13 @@ class Pair_trading_processor(Data_processor):
 
 			if x %12 ==0:
 				print("\nConsole (PT): Processing for ",round(lag*1000,2),"ms , Sleep for",round(sleep,5),"s \n")
-				print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
-				round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
-				round(self.spread,5),round(self.roc_1,5),round(self.roc_5,5),round(self.roc_15,5),\
-				self.intra_spread[-15:],\
-				self.cur_minute_list[-15:],"\n")
+				# print(round(self.cur_price[a],2),round(self.cur_percentage_change[a],2),"\n",\
+				# round(self.cur_price[b],2),round(self.cur_percentage_change[b],2),"\n",\
+				# round(self.spread,5),round(self.roc_1,5),round(self.roc_5,5),round(self.roc_15,5),\
+				# self.intra_spread[-15:],\
+				# self.cur_minute_list[-15:],"\n")
+				print("\n",len(self.roc_1_list))
+				print("\n",len(self.cur_time))
 
 			###if pair trade mode is on, display the info###
 
@@ -326,7 +328,7 @@ import matplotlib.ticker as mtick
 
 outlier = dict(linewidth=3, color='darkgoldenrod',marker='o')
 plt.style.use("seaborn-darkgrid")
-f = plt.figure(1,figsize=(10,12))
+f = plt.figure(1,figsize=(10,8))
 f.canvas.set_window_title('SPREAD MONITOR')
 min_form = DateFormatter("%H:%M")
 gs = f.add_gridspec(4, 3)
@@ -390,8 +392,8 @@ def update(self,PT:Pair_trading_processor,readlock):
 		spread5 = PT.intra_spread_MA5[:]
 		spread15 = PT.intra_spread_MA15[:]
 
-		# cur_second = PT.cur_time[:]
-		# min1 = PT.roc_1_list[:]
+		cur_second = PT.cur_time[:]
+		min1 = PT.roc_1_list[:]
 
 
 	roc_1 = PT.roc_1
@@ -414,9 +416,9 @@ def update(self,PT:Pair_trading_processor,readlock):
 		spread.yaxis.set_major_formatter(mtick.PercentFormatter())
 		spread.legend()
 
-		# m1.clear()
-		# m1.plot(cur_minute,min1,"y",label="current spread")
-		# m1.xaxis.set_major_formatter(min_form)
+		m1.clear()
+		m1.plot(cur_second,min1,"y",label="current spread")
+		m1.xaxis.set_major_formatter(min_form)
 
 		max_spread_d.clear()
 		max_spread_d.set_title('Cur Spread Distribution')
