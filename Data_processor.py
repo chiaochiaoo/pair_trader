@@ -97,7 +97,7 @@ class Data_processor:
 
 		for i in symbols:
 
-			self.init_price[i] =1
+			self.init_price[i] =0
 			self.cur_price[i] =0
 			self.cur_volume[i] =0
 			self.cur_transaction[i] =0

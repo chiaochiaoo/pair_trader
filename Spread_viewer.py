@@ -148,8 +148,7 @@ class Pair_trading_processor(Data_processor):
 
 		print("Console (PT): Pair trading moudule begins. ")
 		super().tos_start()
-
-		#self.fetch_missing_data()
+		self.fetch_missing_data()
 
 		interval = self.interval
 
@@ -328,7 +327,7 @@ import matplotlib.ticker as mtick
 outlier = dict(linewidth=3, color='darkgoldenrod',marker='o')
 plt.style.use("seaborn-darkgrid")
 f = plt.figure(1,figsize=(10,12))
-f.canvas.set_window_title('SPREAD VIEWER')
+f.canvas.set_window_title('SPREAD MONITOR')
 min_form = DateFormatter("%H:%M")
 gs = f.add_gridspec(4, 3)
 
@@ -422,33 +421,33 @@ def update(self,PT:Pair_trading_processor,readlock):
 		max_spread_d.clear()
 		max_spread_d.set_title('Cur Spread Distribution')
 		max_spread_d.boxplot(intra_spread, flierprops=outlier,vert=False, whis=1)
-		max_spread_d.axvline(x=cur_spread,linewidth=4,color="r")
+		max_spread_d.axvline(x=cur_spread,color="r")
 
 		max_spread_w.clear()
 		max_spread_w.set_title('W Spread Distribution')
 		max_spread_w.boxplot(w_dis, flierprops=outlier,vert=False, whis=1)
-		max_spread_w.axvline(x=cur_spread,linewidth=4,color="r")
+		max_spread_w.axvline(x=cur_spread,color="r")
 
 		max_spread_m.clear()
 		max_spread_m.set_title('M Spread Distribution')
 		max_spread_m.boxplot(m_dis, flierprops=outlier,vert=False, whis=1)
-		max_spread_m.axvline(x=cur_spread,linewidth=4,color="r")
+		max_spread_m.axvline(x=cur_spread,color="r")
 
 
 		roc1.clear()
 		roc1.set_title('Speed 1 min')
 		roc1.boxplot(roc1l, flierprops=outlier,vert=False, whis=1.5)
-		roc1.axvline(x=roc_1,linewidth=4,color="r")
+		roc1.axvline(x=roc_1,color="r")
 
 		roc5.clear()
 		roc5.set_title('Speed 5 min')
-		roc5.axvline(x=roc_5,linewidth=4,color="r")
+		roc5.axvline(x=roc_5,linewidth=2,color="r")
 		roc5.boxplot(roc5l, flierprops=outlier,vert=False, whis=1.5)
 
 		roc15.clear()
 		roc15.set_title('Speed 15 min')
 		roc15.boxplot(roc15l, flierprops=outlier,vert=False, whis=1.5)
-		roc15.axvline(x=roc_15,linewidth=4,color="r")
+		roc15.axvline(x=roc_15,linewidth=2,color="r")
 
 
 ani = FuncAnimation(f,update,fargs=(test,readlock),interval=1000)
