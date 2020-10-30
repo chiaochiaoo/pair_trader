@@ -390,8 +390,8 @@ def update(self,PT:Pair_trading_processor,readlock):
 		spread5 = PT.intra_spread_MA5[:]
 		spread15 = PT.intra_spread_MA15[:]
 
-		cur_second = PT.cur_time[:]
-		min1 = PT.roc_1_list[:]
+		# cur_second = PT.cur_time[:]
+		# min1 = PT.roc_1_list[:]
 
 
 	roc_1 = PT.roc_1
@@ -414,9 +414,9 @@ def update(self,PT:Pair_trading_processor,readlock):
 		spread.yaxis.set_major_formatter(mtick.PercentFormatter())
 		spread.legend()
 
-		m1.clear()
-		m1.plot(cur_minute,min1,"y",label="current spread")
-		m1.xaxis.set_major_formatter(min_form)
+		# m1.clear()
+		# m1.plot(cur_minute,min1,"y",label="current spread")
+		# m1.xaxis.set_major_formatter(min_form)
 
 		max_spread_d.clear()
 		max_spread_d.set_title('Cur Spread Distribution')
