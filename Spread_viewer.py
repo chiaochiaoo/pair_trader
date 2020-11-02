@@ -9,6 +9,9 @@ import matplotlib as mpl
 import sys
 import os
 import Spread_viewer_function as SVF
+from datetime import date
+from os import path
+import csv
 ##########################################
 
 #############################################
@@ -76,6 +79,18 @@ class Pair_trading_processor(Data_processor):
 		if len(symbols)==2:
 			print("Console (PT): Pair trade mode on, Symbols: ",str(self.symbols))	
 			self.enable = True	
+
+
+
+		
+		self.file_name = "data/"+symbols[0]+"_"+symbols[1]+"_"+str(date.today())[5:]+".csv"
+
+		if not path.exists(self.file_name):
+			with open(self.file_name, 'w',newline='') as csvfile:
+				writer = csv.writer(csvfile)
+				writer.writerow(['timestamp', 'price1','size1','ticks1','change1', 'price2','size2','ticks2','change2','roc_1','roc_5','roc_15','spread'])
+
+
 
 
 	def start(self):
@@ -285,6 +300,15 @@ class Pair_trading_processor(Data_processor):
 				self.intra_spread_MA5.append(chiao.mean(self.intra_spread[-5:]))
 				self.intra_spread_MA15.append(chiao.mean(self.intra_spread[-15:]))
 
+			
+			with open(self.file_name, 'a',newline='') as csvfile:
+				writer = csv.writer(csvfile)
+
+				#['timestamp', 'price1','size1','ticks1','change1', 'price2','size2','ticks2','change2','roc_1','roc_5','roc_15','spread']
+				writer.writerow([t,self.cur_price[a],self.cur_volume[a],self.cur_transaction[a],self.cur_percentage_change[a],\
+					self.cur_price[b],self.cur_volume[b],self.cur_transaction[b],self.cur_percentage_change[b],\
+					self.roc_1,self.roc_5,self.roc_15,self.spread])
+
 		#print("Legnth check",len(self.cur_time),len(self.intra_spread),len(self.roc),len(self.cors_10),len(self.vol_ratio_15))
 
 	# integrated graphing conponent. 
@@ -421,8 +445,9 @@ def update(self,PT:Pair_trading_processor,readlock):
 
 		m1.clear()
 		m1.plot(cur_second,min1,"y",label="current spread")
+		m1.axhline(y=0,color="r")
 		m1.xaxis.set_major_formatter(sec_form)
-		m1.tick_params(axis='both', which='major', labelsize=8)
+		
 
 		max_spread_d.clear()
 		max_spread_d.set_title('Cur Spread Distribution')
