@@ -336,7 +336,8 @@ class Data_processor:
 			with self.readlock:
 
 				t = '{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute))
-				self.cur_minute_list.append(t)
+				
+				#self.cur_minute_list.append(t)
 				self.cur_minute = t
 
 				for i in self.symbols:
