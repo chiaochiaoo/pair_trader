@@ -358,7 +358,7 @@ f.canvas.set_window_title('SPREAD MONITOR')
 min_form = DateFormatter("%H:%M")
 sec_form = DateFormatter("%M:%S")
 
-gs = f.add_gridspec(4, 3)
+gs = f.add_gridspec(5, 3)
 
 a=[1,2,1]
 b=[1,2,3]
@@ -375,9 +375,9 @@ m1 = f.add_subplot(gs[3,:])
 m1.tick_params(axis='both', which='major', labelsize=8)
 m1.set_title('1 min Spread')
 
-# m2 = f.add_subplot(gs[4,:])
-# m2.tick_params(axis='both', which='major', labelsize=8)
-# m2.set_title('5 min Spread')
+m2 = f.add_subplot(gs[4,:])
+m2.tick_params(axis='both', which='major', labelsize=8)
+m2.set_title('5 min Spread')
 
 
 m_dis,w_dis,roc1l,roc5l,roc15l = SVF.find_info(symbols)
@@ -433,6 +433,9 @@ def update(self,PT:Pair_trading_processor,readlock):
         cur_spread = PT.spread
         today_spread_dis = PT.max_spread_bin_today
 
+        s1 = PT.cur_percentage_change_list[PT.symbols[0]][-600:]
+        s2 = PT.cur_percentage_change_list[PT.symbols[1]][-600:]
+
 
 
     if(len(cur_time)>1):
@@ -454,6 +457,13 @@ def update(self,PT:Pair_trading_processor,readlock):
         m1.axhline(y=0,color="r")
         m1.xaxis.set_major_formatter(sec_form)
     
+        
+        m2.clear()
+        m2.plot(cur_second,s1,"y",label=PT.symbols[0])
+        m2.plot(cur_second,s2,"b",label=PT.symbols[1])
+        m2.legend()
+        m2.yaxis.set_major_formatter(mtick.PercentFormatter())
+        m2.xaxis.set_major_formatter(sec_form)
 
         max_spread_d.clear()
         max_spread_d.set_title('Cur Spread Distribution')
