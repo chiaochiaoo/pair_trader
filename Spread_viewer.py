@@ -56,6 +56,7 @@ class Pair_trading_processor(Data_processor):
         self.cors_5 = []
         self.cors_15 = []
 
+        self.cor_5 = 0
 
         self.max_spread_bin_today = [0]
         # self.max_spread_bin_weekly = w_dis
@@ -244,8 +245,8 @@ class Pair_trading_processor(Data_processor):
             # print("length:",len(self.cur_price_list[a]),len(self.cur_price_list[b]))
             # print("pass in :",self.cur_price_list[a][-120:],self.cur_price_list[b][-120:])
             # print("pass in :",self.cur_price_list[a][-120:][:-1],self.cur_price_list[b][-120:][:-1])
-            cor_5 = chiao.cor(self.minute_open_list[a][-10:],self.minute_open_list[b][-10:]) 
-            cor_15 =chiao.cor(self.minute_open_list[a][-30:],self.minute_open_list[b][-30:]) 
+            cor_5 = chiao.cor(self.cur_percentage_change_list[a][-300:],self.cur_percentage_change_list[b][-300:]) 
+            #cor_15 =chiao.cor(self.cur_percentage_change_list[a][-15:],self.cur_percentage_change_list[b][-15:]) 
 
         # vol ratio is total vol of 15 min, and 30 min.
         showVolume = False
@@ -287,6 +288,7 @@ class Pair_trading_processor(Data_processor):
 
             self.cur_time.append(t)
 
+            self.cor_5 = cor_5 
             #now the update data. 
             #self.intra_spread.append(self.spread)
             self.roc_1_list.append(self.roc_1)
@@ -297,6 +299,9 @@ class Pair_trading_processor(Data_processor):
             # self.cors_15.append(cor_15)
 
             if self.aggregate_counter% self.minute_counter == 0:
+                
+                t = '{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute))
+                
                 self.cur_minute_list.append(t)
                 self.intra_spread.append(self.spread)
                 self.intra_spread_MA5.append(chiao.mean(self.intra_spread[-5:]))
@@ -434,6 +439,8 @@ def update(self,PT:Pair_trading_processor,readlock):
         cur_spread = PT.spread
         today_spread_dis = PT.max_spread_bin_today
 
+        cor = self.cor_5
+
         s1 = PT.cur_percentage_change_list[PT.symbols[0]][-600:]
         s2 = PT.cur_percentage_change_list[PT.symbols[1]][-600:]
 
@@ -453,6 +460,7 @@ def update(self,PT:Pair_trading_processor,readlock):
         spread.legend()
 
         m1.clear()
+        max_spread_d.set_title('Cur Spread,Cor:'+str(cor))
         m1.plot(cur_second,min1,"y",label="current spread")
         m1.plot(cur_second,min5,"b",label="current spread")
         m1.axhline(y=0,color="r")
