@@ -418,16 +418,13 @@ def update(self,PT:Pair_trading_processor,readlock):
         intra_spread = PT.intra_spread[:]
         spread5 = PT.intra_spread_MA5[:]
         spread15 = PT.intra_spread_MA15[:]
-
         cur_second = PT.cur_time[-600:]
         min1 = PT.roc_1_list[-600:]
-
-
-    roc_1 = PT.roc_1
-    roc_5 = PT.roc_5
-    roc_15 = PT.roc_15
-    cur_spread = PT.spread
-    today_spread_dis = PT.max_spread_bin_today
+        roc_1 = PT.roc_1
+        roc_5 = PT.roc_5
+        roc_15 = PT.roc_15
+        cur_spread = PT.spread
+        today_spread_dis = PT.max_spread_bin_today
 
 
 
