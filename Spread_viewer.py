@@ -299,7 +299,7 @@ class Pair_trading_processor(Data_processor):
             # self.cors_15.append(cor_15)
 
             if self.aggregate_counter% self.minute_counter == 0:
-                
+
                 t = '{}:{}'.format('{:02d}'.format(now.hour), '{:02d}'.format(now.minute))
                 
                 self.cur_minute_list.append(t)
@@ -439,7 +439,7 @@ def update(self,PT:Pair_trading_processor,readlock):
         cur_spread = PT.spread
         today_spread_dis = PT.max_spread_bin_today
 
-        cor = self.cor_5
+        cor = PT.cor_5
 
         s1 = PT.cur_percentage_change_list[PT.symbols[0]][-600:]
         s2 = PT.cur_percentage_change_list[PT.symbols[1]][-600:]
