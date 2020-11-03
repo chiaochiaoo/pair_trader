@@ -369,9 +369,15 @@ spread = f.add_subplot(gs[0,:])
 spread.tick_params(axis='both', which='major', labelsize=8)
 spread.set_title('IntraDay Spread')
 
+
+
 m1 = f.add_subplot(gs[3,:])
 m1.tick_params(axis='both', which='major', labelsize=8)
 m1.set_title('1 min Spread')
+
+# m2 = f.add_subplot(gs[4,:])
+# m2.tick_params(axis='both', which='major', labelsize=8)
+# m2.set_title('5 min Spread')
 
 
 m_dis,w_dis,roc1l,roc5l,roc15l = SVF.find_info(symbols)
@@ -420,6 +426,7 @@ def update(self,PT:Pair_trading_processor,readlock):
         spread15 = PT.intra_spread_MA15[:]
         cur_second = PT.cur_time[-600:]
         min1 = PT.roc_1_list[-600:]
+        min5 = PT.roc_5_list[-600:]
         roc_1 = PT.roc_1
         roc_5 = PT.roc_5
         roc_15 = PT.roc_15
@@ -443,9 +450,10 @@ def update(self,PT:Pair_trading_processor,readlock):
 
         m1.clear()
         m1.plot(cur_second,min1,"y",label="current spread")
+        m1.plot(cur_second,min5,"b",label="current spread")
         m1.axhline(y=0,color="r")
         m1.xaxis.set_major_formatter(sec_form)
-        
+    
 
         max_spread_d.clear()
         max_spread_d.set_title('Cur Spread Distribution')
