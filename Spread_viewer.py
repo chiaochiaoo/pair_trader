@@ -297,6 +297,7 @@ class Pair_trading_processor(Data_processor):
             # self.cors_15.append(cor_15)
 
             if self.aggregate_counter% self.minute_counter == 0:
+                self.cur_minute_list.append(t)
                 self.intra_spread.append(self.spread)
                 self.intra_spread_MA5.append(chiao.mean(self.intra_spread[-5:]))
                 self.intra_spread_MA15.append(chiao.mean(self.intra_spread[-15:]))
@@ -375,9 +376,9 @@ m1 = f.add_subplot(gs[3,:])
 m1.tick_params(axis='both', which='major', labelsize=8)
 m1.set_title('1 min Spread')
 
-m2 = f.add_subplot(gs[4,:])
-m2.tick_params(axis='both', which='major', labelsize=8)
-m2.set_title('5 min Spread')
+# m2 = f.add_subplot(gs[4,:])
+# m2.tick_params(axis='both', which='major', labelsize=8)
+# m2.set_title('5 min Spread')
 
 
 m_dis,w_dis,roc1l,roc5l,roc15l = SVF.find_info(symbols)
@@ -458,12 +459,12 @@ def update(self,PT:Pair_trading_processor,readlock):
         m1.xaxis.set_major_formatter(sec_form)
     
         
-        m2.clear()
-        m2.plot(cur_second,s1,"y",label=PT.symbols[0])
-        m2.plot(cur_second,s2,"b",label=PT.symbols[1])
-        m2.legend()
-        m2.yaxis.set_major_formatter(mtick.PercentFormatter())
-        m2.xaxis.set_major_formatter(sec_form)
+        # m2.clear()
+        # m2.plot(cur_second,s1,"y",label=PT.symbols[0])
+        # m2.plot(cur_second,s2,"b",label=PT.symbols[1])
+        # m2.legend()
+        # m2.yaxis.set_major_formatter(mtick.PercentFormatter())
+        # m2.xaxis.set_major_formatter(sec_form)
 
         max_spread_d.clear()
         max_spread_d.set_title('Cur Spread Distribution')
