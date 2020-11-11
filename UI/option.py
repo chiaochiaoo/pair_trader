@@ -85,7 +85,7 @@ class Toplevel1:
         top.minsize(120, 1)
         top.maxsize(2564, 1421)
         top.resizable(1,  1)
-        top.title("New Toplevel")
+        top.title("Option Forecasting Tool")
         top.configure(background="#d9d9d9")
 
         self.Labelframe1 = tk.LabelFrame(top)
