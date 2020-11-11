@@ -55,7 +55,7 @@ def get_option(symbol,timestamp):
 
     res = response.text
     res = json.loads(res)
-    
+
     return res
 
 def get_dates(res):
@@ -78,8 +78,7 @@ def missing_values(res):
         if "openInterest" not in res['contracts']['calls'][i]:
             res['contracts']['calls'][i]["openInterest"]={}
             res['contracts']['calls'][i]["openInterest"]["fmt"] = None
-            
-            
+
     for i in range(len(res['contracts']['puts'])):
         if "volume" not in res['contracts']['puts'][i]:
             res['contracts']['puts'][i]["volume"] = {}
