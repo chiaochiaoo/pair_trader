@@ -27,8 +27,8 @@ choices = [
     ("Automatic",1),
     ("Regressive",2),
     ("Stationary",3),
-    ("Bullish",4),
-    ("Bearish",5)
+    ("Bullish⠀⠀",4),
+    ("Bearish⠀⠀",5)
 ]
 
 
@@ -300,7 +300,7 @@ class Toplevel1:
         self.bearish_input.configure(selectforeground="white")
 
         self.Label2 = tk.Label(self.Labelframe2)
-        self.Label2.place(relx=0.277, rely=0.347, height=21, width=34
+        self.Label2.place(relx=0.277, rely=0.32, height=21, width=34
                 , bordermode='ignore')
         self.Label2.configure(background="#d9d9d9")
         self.Label2.configure(disabledforeground="#a3a3a3")
@@ -308,7 +308,7 @@ class Toplevel1:
         self.Label2.configure(text='''Days:''')
 
         self.Label2_1 = tk.Label(self.Labelframe2)
-        self.Label2_1.place(relx=0.254, rely=0.644, height=21, width=73
+        self.Label2_1.place(relx=0.254, rely=0.62, height=21, width=73
                 , bordermode='ignore')
         self.Label2_1.configure(activebackground="#f9f9f9")
         self.Label2_1.configure(activeforeground="black")
@@ -320,7 +320,7 @@ class Toplevel1:
         self.Label2_1.configure(text='''Magnitude:''')
 
         self.Label2_1_1 = tk.Label(self.Labelframe2)
-        self.Label2_1_1.place(relx=0.254, rely=0.792, height=21, width=73
+        self.Label2_1_1.place(relx=0.254, rely=0.77, height=21, width=73
                 , bordermode='ignore')
         self.Label2_1_1.configure(activebackground="#f9f9f9")
         self.Label2_1_1.configure(activeforeground="black")
