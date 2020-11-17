@@ -133,7 +133,8 @@ class Toplevel1:
         self.status.configure(background="#d9d9d9")
         self.status.configure(disabledforeground="#a3a3a3")
         self.status.configure(foreground="#000000")
-        self.status.configure(text='''Status: waiting for symbol''')
+        self.status.configure(text='''Status: Data download complete''')
+        #self.status.configure(text='''Status: waiting for symbol''')
 
         self.Labelframe2 = tk.LabelFrame(top)
         self.Labelframe2.place(relx=0.079, rely=0.155, relheight=0.196
@@ -338,6 +339,102 @@ class Toplevel1:
         self.Labelframe3.configure(foreground="black")
         self.Labelframe3.configure(text='''Options''')
         self.Labelframe3.configure(background="#d9d9d9")
+
+        labels = ["Date", "67% confidence range", "Strike","Ask","95% confidence range", "Strike","Ask", "Most Open Interest"]
+        width = [12,18,8,8,18,8,8,25]
+
+
+
+        dates = ['2020-11-13', '2020-11-20', '2020-11-27', '2020-12-04',
+               '2020-12-11', '2020-12-18', '2020-12-24', '2021-01-15',
+               '2021-02-19', '2021-03-19', '2021-04-16', '2021-06-18',
+               '2021-09-17']
+
+        int1= [(110.77506409253698, 121.70832398350228),
+         (106.8949916778185, 126.85630190897905),
+         (104.49641738178009, 130.52278171577572),
+         (99.95557924731003, 138.86733638252065),
+         (96.30650158701738, 147.58803608584643),
+         (91.6670798528975, 163.63860741679085),
+         (90.51633522238625, 169.86097409033522),
+         (88.97453389470878, 182.81392501483725),
+         (88.38670974348844, 199.88452080591526),
+         (89.5686705929695, 221.52485915008327),
+         (92.5224399453131, 245.19710552366362),
+         (95.04099151922078, 259.1613255896136),
+         (99.18683882391986, 277.8377774785636)]
+
+        int2 = [(105.30843414705433, 127.17495392898493),
+         (96.9143365622382, 136.83695702455933),
+         (91.48323521478227, 143.53596388277356),
+         (80.49970067970472, 158.32321495012596),
+         (70.66573433760286, 173.22880333526095),
+         (55.681316070950814, 199.62437119873755),
+         (50.84401578841175, 209.53329352430973),
+         (42.05483833464456, 229.73362057490147),
+         (32.63780421227503, 255.63342633712867),
+         (23.5905763144126, 287.5029534286402),
+         (16.185107156137832, 321.5344383128389),
+         (12.980824484024367, 341.22149262481),
+         (9.861369496597973, 367.1632468058855)]
+
+        int1 = [(round(i[0],2),round(i[1],2)) for i in int1]
+        int2 = [(round(i[0],2),round(i[1],2)) for i in int2]
+
+        puts =[110.0,106.0,104.0,99.0,96.0,90.0,90.0,88.75,85.0,88.75,92.5,95.0, 97.5]
+        ask = [0.09, 0.24, 0.28, 0.27, 0.3, 0.25, 0.32, 0.52, 0.78, 1.36, 2.16, 3.85, 6.05]
+
+
+        puts2= [105.0, 96.0, 90.0, 80.0, 70.0, 33.75, 0, 40.0, 0, 0, 0, 0, 0]
+        ask2 = [0.04, 0.07, 0.08, 0.09, 0.07, 0.16, 0, 0.05, 0, 0, 0, 0, 0]
+
+        oi = ["OI: 11386 strike: 110.0 , ask: 0.09 ",
+"OI: 32003 strike: 100.0 , ask: 0.11 ",
+"OI: 2943 strike: 100.0 , ask: 0.17 ",
+"OI: 1187 strike: 90.0 , ask: 0.13 ",
+"OI: 939 strike: 90.0 , ask: 0.18 ",
+"OI: 45691 strike: 90.0 , ask: 0.25 ",
+"OI: 296 strike: 90.0 , ask: 0.32 ",
+"OI: 83097 strike: 37.5 , ask: 0.04 ",
+"OI: 1291 strike: 80.0 , ask: 0.59 ",
+"OI: 13625 strike: 80.0 , ask: 0.77 ",
+"OI: 4042 strike: 90.0 , ask: 1.81 ",
+"OI: 30193 strike: 45.0 , ask: 0.29 ",
+"OI: 14265 strike: 90.0 , ask: 4.1 "]
+
+        label = [dates,int1,puts,ask,int2,puts2,ask2,oi]
+        for i in range(len(labels)):
+            self.label1 = tk.Label(self.Labelframe3 ,text=labels[i],width=width[i])
+
+            self.label1.configure(activebackground="#f9f9f9")
+            self.label1.configure(activeforeground="black")
+            self.label1.configure(background="#d9d9d9")
+            self.label1.configure(disabledforeground="#a3a3a3")
+            self.label1.configure(relief="ridge")
+            self.label1.configure(foreground="#000000")
+            self.label1.configure(highlightbackground="#d9d9d9")
+            self.label1.configure(highlightcolor="black")
+            self.label1.grid(row=1, column=i,padx=5)
+
+        for j in range(13):
+            for i in range(len(label)):
+                self.label1 = tk.Label(self.Labelframe3 ,text=label[i][j],width=width[i])
+
+                self.label1.configure(activebackground="#f9f9f9")
+                self.label1.configure(activeforeground="black")
+                self.label1.configure(background="#d9d9d9")
+                self.label1.configure(disabledforeground="#a3a3a3")
+                self.label1.configure(relief="ridge")
+                self.label1.configure(foreground="#000000")
+                self.label1.configure(highlightbackground="#d9d9d9")
+                self.label1.configure(highlightcolor="black")
+                self.label1.grid(row=j+2, column=i,padx=5)
+
+
+
+
+
+
 
 if __name__ == '__main__':
     vp_start_gui()
