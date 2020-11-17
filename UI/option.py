@@ -137,12 +137,23 @@ class Toplevel1:
         #self.status.configure(text='''Status: waiting for symbol''')
 
         self.Labelframe2 = tk.LabelFrame(top)
-        self.Labelframe2.place(relx=0.079, rely=0.155, relheight=0.196
+        self.Labelframe2.place(relx=0.079, rely=0.155, relheight=0.096
                 , relwidth=0.85)
         self.Labelframe2.configure(relief='groove')
         self.Labelframe2.configure(foreground="black")
-        self.Labelframe2.configure(text='''Forecast Setting''')
+        self.Labelframe2.configure(text='''Symbol Info''')
         self.Labelframe2.configure(background="#d9d9d9")
+
+
+        text = " Symbol: {}    Last Price: {}    Open: {}    High:{}    Low:{}    Close:{}".format("AAPL",121,121,121,121,121,121)
+
+        self.Labels = tk.Label(self.Labelframe2)
+        self.Labels.place(relx=0.011, rely=0.476#, #height=21 #width=104
+                , bordermode='ignore')
+        self.Labels.configure(background="#d9d9d9")
+        self.Labels.configure(disabledforeground="#a3a3a3")
+        self.Labels.configure(foreground="#000000")
+        self.Labels.configure(text=text)
 
         # self.Radiobutton1 = tk.Radiobutton(self.Labelframe2)
         # self.Radiobutton1.place(relx=0.104, rely=0.149, relheight=0.144
@@ -215,132 +226,132 @@ class Toplevel1:
         # self.Radiobutton1_3_1.configure()
         #self.Radiobutton1_3_1.configure(variable=option_support.selectedButton)
 
-        global v
-        v = tk.IntVar()
-        v.set(1)
+        # global v
+        # v = tk.IntVar()
+        # v.set(1)
 
-        for val, language in enumerate(choices):
-            print(val,language[0])
-            self.b=tk.Radiobutton(self.Labelframe2, 
-                          text=language[0],
-                          padx = 20, 
-                          variable=v, 
-                          command=ShowChoice,
-                          activebackground="#ececec",
-                          activeforeground="#000000",
-                          background="#d9d9d9",
-                          disabledforeground="#a3a3a3",
-                          foreground="#000000",
-                          highlightbackground="#d9d9d9",
-                          highlightcolor="black",
-                          justify='left',
-                          value=val)
-            self.b.place(relx=0.092, rely=0.15*(val+1), relheight=0.134
-                , relwidth=0.15, bordermode='ignore')
+        # for val, language in enumerate(choices):
+        #     print(val,language[0])
+        #     self.b=tk.Radiobutton(self.Labelframe2, 
+        #                   text=language[0],
+        #                   padx = 20, 
+        #                   variable=v, 
+        #                   command=ShowChoice,
+        #                   activebackground="#ececec",
+        #                   activeforeground="#000000",
+        #                   background="#d9d9d9",
+        #                   disabledforeground="#a3a3a3",
+        #                   foreground="#000000",
+        #                   highlightbackground="#d9d9d9",
+        #                   highlightcolor="black",
+        #                   justify='left',
+        #                   value=val)
+        #     self.b.place(relx=0.092, rely=0.15*(val+1), relheight=0.134
+        #         , relwidth=0.15, bordermode='ignore')
 
 
-        self.Forecast = tk.Button(self.Labelframe2)
-        self.Forecast.place(relx=0.762, rely=0.198, height=44, width=157
-                , bordermode='ignore')
-        self.Forecast.configure(activebackground="#ececec")
-        self.Forecast.configure(activeforeground="#000000")
-        self.Forecast.configure(background="#d9d9d9")
-        self.Forecast.configure(disabledforeground="#a3a3a3")
-        self.Forecast.configure(foreground="#000000")
-        self.Forecast.configure(highlightbackground="#d9d9d9")
-        self.Forecast.configure(highlightcolor="black")
-        self.Forecast.configure(pady="0")
-        self.Forecast.configure(text='''Forecast''')
+        # self.Forecast = tk.Button(self.Labelframe2)
+        # self.Forecast.place(relx=0.762, rely=0.198, height=44, width=157
+        #         , bordermode='ignore')
+        # self.Forecast.configure(activebackground="#ececec")
+        # self.Forecast.configure(activeforeground="#000000")
+        # self.Forecast.configure(background="#d9d9d9")
+        # self.Forecast.configure(disabledforeground="#a3a3a3")
+        # self.Forecast.configure(foreground="#000000")
+        # self.Forecast.configure(highlightbackground="#d9d9d9")
+        # self.Forecast.configure(highlightcolor="black")
+        # self.Forecast.configure(pady="0")
+        # self.Forecast.configure(text='''Forecast''')
 
-        self.Forecast_1 = tk.Button(self.Labelframe2)
-        self.Forecast_1.place(relx=0.762, rely=0.644, height=44, width=157
-                , bordermode='ignore')
-        self.Forecast_1.configure(activebackground="#ececec")
-        self.Forecast_1.configure(activeforeground="#000000")
-        self.Forecast_1.configure(background="#d9d9d9")
-        self.Forecast_1.configure(disabledforeground="#a3a3a3")
-        self.Forecast_1.configure(foreground="#000000")
-        self.Forecast_1.configure(highlightbackground="#d9d9d9")
-        self.Forecast_1.configure(highlightcolor="black")
-        self.Forecast_1.configure(pady="0")
-        self.Forecast_1.configure(text='''Chart''')
+        # self.Forecast_1 = tk.Button(self.Labelframe2)
+        # self.Forecast_1.place(relx=0.762, rely=0.644, height=44, width=157
+        #         , bordermode='ignore')
+        # self.Forecast_1.configure(activebackground="#ececec")
+        # self.Forecast_1.configure(activeforeground="#000000")
+        # self.Forecast_1.configure(background="#d9d9d9")
+        # self.Forecast_1.configure(disabledforeground="#a3a3a3")
+        # self.Forecast_1.configure(foreground="#000000")
+        # self.Forecast_1.configure(highlightbackground="#d9d9d9")
+        # self.Forecast_1.configure(highlightcolor="black")
+        # self.Forecast_1.configure(pady="0")
+        # self.Forecast_1.configure(text='''Chart''')
 
-        self.regressive_input = tk.Entry(self.Labelframe2)
-        self.regressive_input.place(relx=0.346, rely=0.347, height=17
-                , relwidth=0.109, bordermode='ignore')
-        self.regressive_input.configure(background="white")
-        self.regressive_input.configure(disabledforeground="#a3a3a3")
-        self.regressive_input.configure(font="TkFixedFont")
-        self.regressive_input.configure(foreground="#000000")
-        self.regressive_input.configure(insertbackground="black")
+        # self.regressive_input = tk.Entry(self.Labelframe2)
+        # self.regressive_input.place(relx=0.346, rely=0.347, height=17
+        #         , relwidth=0.109, bordermode='ignore')
+        # self.regressive_input.configure(background="white")
+        # self.regressive_input.configure(disabledforeground="#a3a3a3")
+        # self.regressive_input.configure(font="TkFixedFont")
+        # self.regressive_input.configure(foreground="#000000")
+        # self.regressive_input.configure(insertbackground="black")
 
-        self.bulish_input = tk.Entry(self.Labelframe2)
-        self.bulish_input.place(relx=0.346, rely=0.644, height=17, relwidth=0.109
-                , bordermode='ignore')
-        self.bulish_input.configure(background="white")
-        self.bulish_input.configure(disabledforeground="#a3a3a3")
-        self.bulish_input.configure(font="TkFixedFont")
-        self.bulish_input.configure(foreground="#000000")
-        self.bulish_input.configure(highlightbackground="#d9d9d9")
-        self.bulish_input.configure(highlightcolor="black")
-        self.bulish_input.configure(insertbackground="black")
-        self.bulish_input.configure(selectbackground="blue")
-        self.bulish_input.configure(selectforeground="white")
+        # self.bulish_input = tk.Entry(self.Labelframe2)
+        # self.bulish_input.place(relx=0.346, rely=0.644, height=17, relwidth=0.109
+        #         , bordermode='ignore')
+        # self.bulish_input.configure(background="white")
+        # self.bulish_input.configure(disabledforeground="#a3a3a3")
+        # self.bulish_input.configure(font="TkFixedFont")
+        # self.bulish_input.configure(foreground="#000000")
+        # self.bulish_input.configure(highlightbackground="#d9d9d9")
+        # self.bulish_input.configure(highlightcolor="black")
+        # self.bulish_input.configure(insertbackground="black")
+        # self.bulish_input.configure(selectbackground="blue")
+        # self.bulish_input.configure(selectforeground="white")
 
-        self.bearish_input = tk.Entry(self.Labelframe2)
-        self.bearish_input.place(relx=0.346, rely=0.792, height=17
-                , relwidth=0.109, bordermode='ignore')
-        self.bearish_input.configure(background="white")
-        self.bearish_input.configure(disabledforeground="#a3a3a3")
-        self.bearish_input.configure(font="TkFixedFont")
-        self.bearish_input.configure(foreground="#000000")
-        self.bearish_input.configure(highlightbackground="#d9d9d9")
-        self.bearish_input.configure(highlightcolor="black")
-        self.bearish_input.configure(insertbackground="black")
-        self.bearish_input.configure(selectbackground="blue")
-        self.bearish_input.configure(selectforeground="white")
+        # self.bearish_input = tk.Entry(self.Labelframe2)
+        # self.bearish_input.place(relx=0.346, rely=0.792, height=17
+        #         , relwidth=0.109, bordermode='ignore')
+        # self.bearish_input.configure(background="white")
+        # self.bearish_input.configure(disabledforeground="#a3a3a3")
+        # self.bearish_input.configure(font="TkFixedFont")
+        # self.bearish_input.configure(foreground="#000000")
+        # self.bearish_input.configure(highlightbackground="#d9d9d9")
+        # self.bearish_input.configure(highlightcolor="black")
+        # self.bearish_input.configure(insertbackground="black")
+        # self.bearish_input.configure(selectbackground="blue")
+        # self.bearish_input.configure(selectforeground="white")
 
-        self.Label2 = tk.Label(self.Labelframe2)
-        self.Label2.place(relx=0.277, rely=0.32, height=21, width=34
-                , bordermode='ignore')
-        self.Label2.configure(background="#d9d9d9")
-        self.Label2.configure(disabledforeground="#a3a3a3")
-        self.Label2.configure(foreground="#000000")
-        self.Label2.configure(text='''Days:''')
+        # self.Label2 = tk.Label(self.Labelframe2)
+        # self.Label2.place(relx=0.277, rely=0.32, height=21, width=34
+        #         , bordermode='ignore')
+        # self.Label2.configure(background="#d9d9d9")
+        # self.Label2.configure(disabledforeground="#a3a3a3")
+        # self.Label2.configure(foreground="#000000")
+        # self.Label2.configure(text='''Days:''')
 
-        self.Label2_1 = tk.Label(self.Labelframe2)
-        self.Label2_1.place(relx=0.254, rely=0.62, height=21, width=73
-                , bordermode='ignore')
-        self.Label2_1.configure(activebackground="#f9f9f9")
-        self.Label2_1.configure(activeforeground="black")
-        self.Label2_1.configure(background="#d9d9d9")
-        self.Label2_1.configure(disabledforeground="#a3a3a3")
-        self.Label2_1.configure(foreground="#000000")
-        self.Label2_1.configure(highlightbackground="#d9d9d9")
-        self.Label2_1.configure(highlightcolor="black")
-        self.Label2_1.configure(text='''Magnitude:''')
+        # self.Label2_1 = tk.Label(self.Labelframe2)
+        # self.Label2_1.place(relx=0.254, rely=0.62, height=21, width=73
+        #         , bordermode='ignore')
+        # self.Label2_1.configure(activebackground="#f9f9f9")
+        # self.Label2_1.configure(activeforeground="black")
+        # self.Label2_1.configure(background="#d9d9d9")
+        # self.Label2_1.configure(disabledforeground="#a3a3a3")
+        # self.Label2_1.configure(foreground="#000000")
+        # self.Label2_1.configure(highlightbackground="#d9d9d9")
+        # self.Label2_1.configure(highlightcolor="black")
+        # self.Label2_1.configure(text='''Magnitude:''')
 
-        self.Label2_1_1 = tk.Label(self.Labelframe2)
-        self.Label2_1_1.place(relx=0.254, rely=0.77, height=21, width=73
-                , bordermode='ignore')
-        self.Label2_1_1.configure(activebackground="#f9f9f9")
-        self.Label2_1_1.configure(activeforeground="black")
-        self.Label2_1_1.configure(background="#d9d9d9")
-        self.Label2_1_1.configure(disabledforeground="#a3a3a3")
-        self.Label2_1_1.configure(foreground="#000000")
-        self.Label2_1_1.configure(highlightbackground="#d9d9d9")
-        self.Label2_1_1.configure(highlightcolor="black")
-        self.Label2_1_1.configure(text='''Magnitude:''')
+        # self.Label2_1_1 = tk.Label(self.Labelframe2)
+        # self.Label2_1_1.place(relx=0.254, rely=0.77, height=21, width=73
+        #         , bordermode='ignore')
+        # self.Label2_1_1.configure(activebackground="#f9f9f9")
+        # self.Label2_1_1.configure(activeforeground="black")
+        # self.Label2_1_1.configure(background="#d9d9d9")
+        # self.Label2_1_1.configure(disabledforeground="#a3a3a3")
+        # self.Label2_1_1.configure(foreground="#000000")
+        # self.Label2_1_1.configure(highlightbackground="#d9d9d9")
+        # self.Label2_1_1.configure(highlightcolor="black")
+        # self.Label2_1_1.configure(text='''Magnitude:''')
 
         self.Labelframe3 = tk.LabelFrame(top)
-        self.Labelframe3.place(relx=0.079, rely=0.369, relheight=0.598
+        self.Labelframe3.place(relx=0.079, rely=0.269, relheight=0.598
                 , relwidth=0.852)
         self.Labelframe3.configure(relief='groove')
         self.Labelframe3.configure(foreground="black")
         self.Labelframe3.configure(text='''Options''')
         self.Labelframe3.configure(background="#d9d9d9")
 
-        labels = ["Date", "67% confidence range", "Strike","Ask","95% confidence range", "Strike","Ask", "Most Open Interest"]
+        labels = ["Expiry Date", "67% confidence range", "Strike","Bid","95% confidence range", "Strike","Bid", "Most Open Interest"]
         width = [12,18,8,8,18,8,8,25]
 
 
@@ -408,7 +419,7 @@ class Toplevel1:
 
             self.label1.configure(activebackground="#f9f9f9")
             self.label1.configure(activeforeground="black")
-            self.label1.configure(background="#d9d9d9")
+            self.label1.configure(background="yellow")
             self.label1.configure(disabledforeground="#a3a3a3")
             self.label1.configure(relief="ridge")
             self.label1.configure(foreground="#000000")
