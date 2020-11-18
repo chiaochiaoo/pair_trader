@@ -156,10 +156,11 @@ def get_all_options(symbol,ui):
     add_options_to_list(res,ls)
 
     #now add the remaining ones. 
-    # for i in range(1,len(dates)):
-    #     ui.status['text'] ="Processing date:","{: %Y-%m-%d}".format(datetime.fromtimestamp(dates[i]+1))
-    #     res = get_option(symbol,dates[i])
-    #     add_options_to_list(res,ls)
+    # for i in range(1,3):
+    for i in range(1,len(dates)):
+        ui.status['text'] ="Processing date:","{: %Y-%m-%d}".format(datetime.fromtimestamp(dates[i]+1))
+        res = get_option(symbol,dates[i])
+        add_options_to_list(res,ls)
 
     df = pd.DataFrame(ls,columns=cols)
     #df.to_csv(symbol+"_options.csv",index=False)
@@ -186,8 +187,8 @@ def days_counter(dates):
 def most_oi(df,dates):
     ls = []
     for i in dates:
-        d= i
-        p = df.loc[(df["expiration"]==d)].copy().reset_index()
+        d = i
+        p = df.loc[(df["expiration"]==d)&(df["type"]=="puts")].copy().reset_index()
         p = p.loc[p["openInterest"]==max(p["openInterest"])].copy().reset_index()
         strike=p["strike"].values[0]
         bid = p["bid"].values[0]
@@ -330,7 +331,7 @@ def database(symbol,days):
     dev = STD(cur_price,HV(p[-200:]),days)
     price_1,price_2 = price_range(cur_price,dev)
 
-    return info,price_1,price_2
+    return info,price_1,price_2,round(HV(p[-252:])*100,3)
 # v = 1
 
 # choices = [
@@ -377,24 +378,7 @@ def destroy_Toplevel1():
 
 
 
-def gragh_oi(df,date,cur_price,level1,level2):
 
-    s = df.loc[(df["expiration"]==date)&(df["type"]=="puts")&(df["strike"]<cur_price*1.2)]["strike"]
-    p = df.loc[(df["expiration"]==date)&(df["type"]=="puts")&(df["strike"]<cur_price*1.2)]["openInterest"]
-
-    plt.figure(figsize=(18,8))
-    c,b,d=plt.hist(s,weights=p,bins=25,width=2,label="OpenInterest counts")
-    plt.xticks(b)
-
-    plt.axvline(cur_price,linestyle="--",linewidth=4,color="c",label="current price")
-    plt.axvline(level1,linestyle="--",linewidth=5,color="y",label="67% interval boundary")
-
-
-    plt.axvline(level2,linestyle="--",linewidth=7,color="r",label="95% interval boundary")
-    plt.legend()
-    plt.show()
-
-    #gragh_oi(df,dates[i],cur_price,list1[i][0],list2[i][0])
 
 
 
@@ -454,7 +438,9 @@ class Toplevel1:
         self.Label1.configure(foreground="#000000")
         self.Label1.configure(text='''Input Symbol''')
 
+        #lambda: change_label_number(2)
         self.Data = tk.Button(self.Labelframe1,command=self.loadsymbol)
+        #self.Data = tk.Button(self.Labelframe1,command=lambda: self.test(2))
         self.Data.place(relx=0.379, rely=0.357, height=34, width=127
                 , bordermode='ignore')
         self.Data.configure(activebackground="#ececec")
@@ -486,7 +472,7 @@ class Toplevel1:
         self.Labelframe2.configure(background="#d9d9d9")
 
 
-        text = " Symbol: {}    Last Price: {}    Current Volitality: {}".format(" ", " "," ")
+        text = " "
 
         self.Labels = tk.Label(self.Labelframe2)
         self.Labels.place(relx=0.011, rely=0.476#, #height=21 #width=104
@@ -505,9 +491,9 @@ class Toplevel1:
         self.Labelframe3.configure(text='''Options''')
         self.Labelframe3.configure(background="#d9d9d9")
 
-        labels = ["Expiry Date", "67% confidence range", "Strike","Bid","95% confidence range", "Strike","Bid", "Most Open Interest"]
+        labels = ["Expiry Date", "Days left","67% confidence range", "Strike","Bid","95% confidence range", "Strike","Bid", "Most Open Interest"]
 
-        width = [12,18,8,8,18,8,8,25]
+        width = [12,6,18,8,8,18,8,8,25]
 
 
         for i in range(len(labels)):
@@ -524,6 +510,10 @@ class Toplevel1:
             self.label1.grid(row=1, column=i,padx=5)
 
 
+    def test(self,m):
+        print(m)
+
+
     def loadsymbol(self):
 
         self.status['text'] ="hello"
@@ -536,40 +526,81 @@ class Toplevel1:
         dates = df.expiration.unique()
         dates_count= days_counter(dates)
 
-        info,price_1,price_2= database(symbol,900)
+        info,price_1,price_2,vol= database(symbol,900)
         cur_price = info['LastPrice'].values[0]
         symbol = info['Symbol'].values[0]
         list1,list2 = report(dates,dates_count,price_1,price_2,df)
 
 
-        width = [12,18,8,8,18,8,8,25]
+        day_vol = round(vol/np.sqrt (252),3)
+
+        self.Labels["text"] = " Symbol: {}    Last Price: {}    Current Volitality (annual): {}%  Current Volitality (daily): {}%".format(symbol, cur_price,vol,day_vol)
+
+        width = [12,6,18,8,8,18,8,8,25]
 
         oi = most_oi(df,dates)
-
+        oi = oi_str(oi)
         puts = np.array(list1).T[0]
         ask = np.array(list1).T[1]
 
         puts2 = np.array(list2).T[0]
         ask2 = np.array(list2).T[1]
 
-        label = [dates,price_1,puts,ask,price_2,puts2,ask2,oi]
+        label = [dates,dates_count,price_1,puts,ask,price_2,puts2,ask2,oi]
+
 
         for j in range(len(dates)):
             for i in range(len(label)):
-                self.label1 = tk.Label(self.Labelframe3 ,text=label[i][j],width=width[i])
+                if (i != len(label)-1):
+                    self.label1 = tk.Label(self.Labelframe3 ,text=label[i][j],width=width[i])
+                    self.label1.configure(activebackground="#f9f9f9")
+                    self.label1.configure(activeforeground="black")
+                    self.label1.configure(background="#d9d9d9")
+                    self.label1.configure(disabledforeground="#a3a3a3")
+                    self.label1.configure(relief="ridge")
+                    self.label1.configure(foreground="#000000")
+                    self.label1.configure(highlightbackground="#d9d9d9")
+                    self.label1.configure(highlightcolor="black")
+                    self.label1.grid(row=j+2, column=i,padx=5)
+                else:
+                    self.label1 = tk.Button(self.Labelframe3 ,text=label[i][j],width=width[i],command=lambda: self.gragh_oi(df,dates[0+j],cur_price,price_1[0+j][0],price_2[0+j][0]))
+                    self.label1.configure(activebackground="#f9f9f9")
+                    self.label1.configure(activeforeground="black")
+                    self.label1.configure(background="#d9d9d9")
+                    self.label1.configure(disabledforeground="#a3a3a3")
+                    self.label1.configure(relief="raised")
+                    self.label1.configure(foreground="#000000")
+                    self.label1.configure(highlightbackground="#d9d9d9")
+                    self.label1.configure(highlightcolor="black")
+                    self.label1.grid(row=j+2, column=i,padx=5)
 
-                self.label1.configure(activebackground="#f9f9f9")
-                self.label1.configure(activeforeground="black")
-                self.label1.configure(background="#d9d9d9")
-                self.label1.configure(disabledforeground="#a3a3a3")
-                self.label1.configure(relief="ridge")
-                self.label1.configure(foreground="#000000")
-                self.label1.configure(highlightbackground="#d9d9d9")
-                self.label1.configure(highlightcolor="black")
-                self.label1.grid(row=j+2, column=i,padx=5)
 
 
+        #gragh_oi(df,dates[i],cur_price,list1[i][0],list2[i][0])
 
+
+    def gragh_oi(self,df,date,cur_price,level1,level2):
+
+        print(date)
+
+        n = df.loc[(df["expiration"]==date)&(df["type"]=="puts")&(df["strike"]<cur_price*1.2)]
+
+        plt.figure(figsize=(12,5))
+        c,b,d=plt.hist(n["strike"].astype(int),weights=n["openInterest"],bins=32,width=4,label="OpenInterest counts")
+
+        plt.xlabel('Strike', fontsize=8)
+        plt.ylabel('open interest count', fontsize=8)
+        plt.xticks(b.astype(int), fontsize=7)
+
+        plt.axvline(cur_price,linestyle="--",linewidth=4,color="c",label="current price")
+        plt.axvline(level1,linestyle="--",linewidth=5,color="y",label="67% interval boundary")
+
+
+        plt.axvline(level2,linestyle="--",linewidth=7,color="r",label="95% interval boundary")
+        plt.legend()
+        plt.show()
+
+        #gragh_oi(df,dates[i],cur_price,list1[i][0],list2[i][0])
 
 
 if __name__ == '__main__':
