@@ -19,17 +19,327 @@ except ImportError:
     import tkinter.ttk as ttk
     py3 = True
 
-#import option_support
+import requests
+import json
+import pandas as pd
+from datetime import datetime
+import matplotlib.pyplot as plt
+from datetime import date
+import pandas as pd 
+import requests
+import numpy as np
+import json
 
-v = 1
 
-choices = [
-    ("Automatic",1),
-    ("Regressive",2),
-    ("Stationary",3),
-    ("Bullish⠀⠀",4),
-    ("Bearish⠀⠀",5)
-]
+def get_first_option(symbol):
+    querystring = {"symbol":symbol,"region":"US"}
+    url = "https://rapidapi.p.rapidapi.com/stock/v2/get-options"
+
+    headers = {
+    'x-rapidapi-host': "apidojo-yahoo-finance-v1.p.rapidapi.com",
+    'x-rapidapi-key': "0da8e9b784msh9001cc4bfc4e7e7p1c6d94jsna54c1aa52dbf"
+    }
+
+    response = requests.request("GET", url, headers=headers, params=querystring)
+
+    res = response.text
+    res = json.loads(res)
+    
+    all_dates = get_dates(res)
+    
+    return res,all_dates
+
+def get_option(symbol,timestamp):
+    querystring = {"symbol":symbol,"date":timestamp,"region":"US"}
+    url = "https://rapidapi.p.rapidapi.com/stock/v2/get-options"
+
+    headers = {
+    'x-rapidapi-host': "apidojo-yahoo-finance-v1.p.rapidapi.com",
+    'x-rapidapi-key': "0da8e9b784msh9001cc4bfc4e7e7p1c6d94jsna54c1aa52dbf"
+    }
+
+    response = requests.request("GET", url, headers=headers, params=querystring)
+
+    res = response.text
+    res = json.loads(res)
+
+    return res
+
+def get_dates(res):
+    return res['meta']['expirationDates']
+
+def missing_values(res):
+    for i in range(len(res['contracts']['calls'])):
+        if "volume" not in res['contracts']['calls'][i]:
+            res['contracts']['calls'][i]["volume"]={}
+            res['contracts']['calls'][i]["volume"]["fmt"] = None
+        if "openInterest" not in res['contracts']['calls'][i]:
+            res['contracts']['calls'][i]["openInterest"]={}
+            res['contracts']['calls'][i]["openInterest"]["fmt"] = None
+
+
+    for i in range(len(res['contracts']['puts'])):
+        if "volume" not in res['contracts']['puts'][i]:
+            res['contracts']['puts'][i]["volume"] = {}
+            res['contracts']['puts'][i]["volume"]["fmt"] = None 
+        if "openInterest" not in res['contracts']['puts'][i]:
+            res['contracts']['puts'][i]["openInterest"]={}
+            res['contracts']['puts'][i]["openInterest"]["fmt"] = None
+
+def try_garb(res,type_):
+
+    if type_ in res:
+        # if a dictionary 
+        if type(res[type_])==type({}):
+            
+            if type_ == "expiration":
+                return res[type_]['fmt']
+            if "raw" in res[type_]: 
+                return res[type_]['raw']
+            #or just return the first key 
+            else:
+                return res[type_][list(res[type_].keys())[0]]
+        else:
+            return res[type_]
+    else:
+        return None
+
+def add_options_to_list(res,ls):
+    missing_values(res)
+    for i in range(len(res['contracts']['calls'])):
+        ls.append([res['contracts']['calls'][i]["contractSymbol"],\
+                      "calls",
+        try_garb(res['contracts']['calls'][i],"currency"),\
+        try_garb(res['contracts']['calls'][i],"inTheMoney"),\
+        try_garb(res['contracts']['calls'][i],"impliedVolatility"),\
+        try_garb(res['contracts']['calls'][i],"expiration"),\
+        try_garb(res['contracts']['calls'][i],"change"),\
+        try_garb(res['contracts']['calls'][i],"strike"),\
+        try_garb(res['contracts']['calls'][i],"contractSize"),\
+        try_garb(res['contracts']['calls'][i],"lastPrice"),\
+        try_garb(res['contracts']['calls'][i],"openInterest"),\
+        try_garb(res['contracts']['calls'][i],"percentChange"),\
+        try_garb(res['contracts']['calls'][i],"ask"),\
+        try_garb(res['contracts']['calls'][i],"bid"),\
+        try_garb(res['contracts']['calls'][i],"volume"),\
+        try_garb(res['contracts']['calls'][i],"lastTradeDate")])
+
+    for i in range(len(res['contracts']['puts'])):
+        ls.append([res['contracts']['puts'][i]["contractSymbol"],\
+                     "puts",
+        try_garb(res['contracts']['puts'][i],"currency"),\
+        try_garb(res['contracts']['puts'][i],"inTheMoney"),\
+        try_garb(res['contracts']['puts'][i],"impliedVolatility"),\
+        try_garb(res['contracts']['puts'][i],"expiration"),\
+        try_garb(res['contracts']['puts'][i],"change"),\
+        try_garb(res['contracts']['puts'][i],"strike"),\
+        try_garb(res['contracts']['puts'][i],"contractSize"),\
+        try_garb(res['contracts']['puts'][i],"lastPrice"),\
+        try_garb(res['contracts']['puts'][i],"openInterest"),\
+        try_garb(res['contracts']['puts'][i],"percentChange"),\
+        try_garb(res['contracts']['puts'][i],"ask"),\
+        try_garb(res['contracts']['puts'][i],"bid"),\
+        try_garb(res['contracts']['puts'][i],"volume"),\
+        try_garb(res['contracts']['puts'][i],"lastTradeDate")])
+
+def get_all_options(symbol,ui):
+
+    cols=['contractSymbol','type','currency', 'inTheMoney',  \
+          'impliedVolatility', 'expiration', 'change',  \
+          'strike', 'contractSize', 'lastPrice',\
+          'openInterest', 'percentChange', 'ask', 'bid','volume', 'lastTradeDate', ]
+
+    res, dates = get_first_option(symbol)
+
+    ls = []
+    ui.status['text'] ="Processing date:","{: %Y-%m-%d}".format(datetime.fromtimestamp(dates[0]+1))
+    add_options_to_list(res,ls)
+
+    #now add the remaining ones. 
+    # for i in range(1,len(dates)):
+    #     ui.status['text'] ="Processing date:","{: %Y-%m-%d}".format(datetime.fromtimestamp(dates[i]+1))
+    #     res = get_option(symbol,dates[i])
+    #     add_options_to_list(res,ls)
+
+    df = pd.DataFrame(ls,columns=cols)
+    #df.to_csv(symbol+"_options.csv",index=False)
+    return df
+
+def days_counter(dates):
+    
+    today = date.today().strftime("%Y-%m-%d")
+
+    length = []
+    
+    diff = 0
+    now = datetime.now()
+    hour = int(now.strftime("%H"))
+    if hour>=16:
+        diff = -1
+        
+    for i in dates:
+        length.append(len(pd.bdate_range(start=today, end=i).day)+diff)
+        
+    return length
+
+
+def most_oi(df,dates):
+    ls = []
+    for i in dates:
+        d= i
+        p = df.loc[(df["expiration"]==d)].copy().reset_index()
+        p = p.loc[p["openInterest"]==max(p["openInterest"])].copy().reset_index()
+        strike=p["strike"].values[0]
+        bid = p["bid"].values[0]
+        ls.append((strike,bid))
+    return ls
+
+def oi_str(oi):
+    s = []
+    
+    for i in oi:
+        s.append("Strike: "+str(i[0])+", Ask: "+str(i[1]))
+        
+    return s
+
+def report(dates,dates_count,price_1,price_2,df):
+
+    list1 = []
+    list2 = []
+
+    for i in range(len(dates)):
+
+        target1 = df.loc[(df["expiration"]==dates[i])&(df["type"]=="puts")&(df["strike"]<price_1[dates_count[i]][0])].copy().reset_index()
+        target2 = df.loc[(df["expiration"]==dates[i])&(df["type"]=="puts")&(df["strike"]<price_2[dates_count[i]][0])].copy().reset_index()
+
+        #Second, pick the highest bid
+
+        strike1 = 0
+        bid1 =0
+        strike2 =0
+        bid2 = 0
+
+        if len(target1)>0:
+            target1 = target1.loc[target1["bid"]==max(target1["bid"])].copy().reset_index()
+            target1 = target1.loc[target1["strike"]==min(target1["strike"])]
+            strike1 = target1["strike"].values[0]
+            bid1 = target1["bid"].values[0]
+        if len(target2)>0:
+            target2 = target2.loc[target2["bid"]==max(target2["bid"])].copy().reset_index()
+            target2 = target2.loc[target2["strike"]==min(target2["strike"])]
+            strike2 = target2["strike"].values[0]
+            bid2 = target2["bid"].values[0]
+        #Third, pick the lowest strike. 
+
+
+        list1.append((round(strike1,2),round(bid1,2)))
+        list2.append((round(strike2,2),round(bid2,2)))
+
+    return list1,list2
+
+
+def HV(p):
+    
+    #np.diff over price itself.
+    x = np.array(p)
+    x = x[1:]/x[:-1]
+    x = np.log(x)
+    x = x - np.mean(x)
+    x = np.power(x,2)
+    x = np.sqrt(sum(x)* 252* (1/(len(x)-1)))
+
+    return x
+
+#S*V*M*SQRT(n/252)
+
+#estimate range of day N.
+def STD(S,V,d):
+
+    dev = []
+
+    for i in range(1,d+1):
+        dev.append(S*V*np.sqrt(i/252))
+
+    return np.array(dev)
+
+def implied_vol(hv,d):
+
+    deviations = []
+
+    for i in range(1,d+1):
+        deviations.append(S*V*np.sqrt(i/252))
+
+    return np.array(deviations)
+
+
+def download_daily(i,days):
+
+
+    postbody = "http://api.kibot.com/?action=login&user=sajali26@hotmail.com&password=guupu4upu"
+    r= requests.post(postbody)
+
+    postbody = "http://api.kibot.com/?action=history&symbol="+str(i)+"&interval=daily&period="+str(days)+"&regularsession=1"
+    r= requests.post(postbody)
+    if r.status_code==200:
+        print("Donwload "+i+" successful. Writing to files")
+        r = r.text
+        with open("temp", "w") as text_file:
+            text_file.write(r)
+
+        print("Writing "+i+" completed.")
+        j = pd.read_csv("temp",names=["day","open","high","low","close","volume"])
+
+    return j
+
+def price_range(cur_price,dev):
+
+    price_1 = []
+    price_2 = []
+    for i in range(len(dev)):
+        #print(dev[i])
+        if cur_price-dev[i]>0:
+            price_1.append((round(cur_price-dev[i],2),round(cur_price+dev[i],2)))
+        else:
+            price_1.append((0,cur_price+dev[i]))
+        if cur_price-dev[i]*2>0:
+            price_2.append((round(cur_price-dev[i]*2,2),round(cur_price+dev[i]*2,2)))
+        else:
+            price_2.append((0,round(cur_price+dev[i]*2),2))
+
+    return price_1,price_2
+
+def get_current_info(symbol):
+
+    symbols=symbol
+    postbody = "http://api.kibot.com/?action=snapshot&symbol="+symbols+"&user=sajali26@hotmail.com&password=guupu4upu"
+    r= requests.post(postbody)
+    r = r.text
+    with open("temp", "w") as text_file:
+        text_file.write(r)
+    res = pd.read_csv("temp")
+
+    return res
+
+def database(symbol,days):
+
+    j = download_daily(symbol, days)
+    # t = pd.to_datetime(j["day"])
+    p = j["close"]
+    info = get_current_info(symbol)
+    cur_price = info["LastPrice"].values[0]
+    dev = STD(cur_price,HV(p[-200:]),days)
+    price_1,price_2 = price_range(cur_price,dev)
+
+    return info,price_1,price_2
+# v = 1
+
+# choices = [
+#     ("Automatic",1),
+#     ("Regressive",2),
+#     ("Stationary",3),
+#     ("Bullish⠀⠀",4),
+#     ("Bearish⠀⠀",5)
+# ]
 
 
 def vp_start_gui():
@@ -39,10 +349,6 @@ def vp_start_gui():
     #option_support.set_Tk_var()
     top = Toplevel1 (root)
     #option_support.init(root, top)
-
-
-
-
 
     root.mainloop()
 
@@ -68,13 +374,47 @@ def destroy_Toplevel1():
     w.destroy()
     w = None
 
+
+
+
+def gragh_oi(df,date,cur_price,level1,level2):
+
+    s = df.loc[(df["expiration"]==date)&(df["type"]=="puts")&(df["strike"]<cur_price*1.2)]["strike"]
+    p = df.loc[(df["expiration"]==date)&(df["type"]=="puts")&(df["strike"]<cur_price*1.2)]["openInterest"]
+
+    plt.figure(figsize=(18,8))
+    c,b,d=plt.hist(s,weights=p,bins=25,width=2,label="OpenInterest counts")
+    plt.xticks(b)
+
+    plt.axvline(cur_price,linestyle="--",linewidth=4,color="c",label="current price")
+    plt.axvline(level1,linestyle="--",linewidth=5,color="y",label="67% interval boundary")
+
+
+    plt.axvline(level2,linestyle="--",linewidth=7,color="r",label="95% interval boundary")
+    plt.legend()
+    plt.show()
+
+    #gragh_oi(df,dates[i],cur_price,list1[i][0],list2[i][0])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Toplevel1:
     def __init__(self, top=None):
-
-
-  # initializing the choice, i.e. Python
-        '''This class configures and populates the toplevel window.
-           top is the toplevel containing window.'''
         _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
         _fgcolor = '#000000'  # X11 color: 'black'
         _compcolor = '#d9d9d9' # X11 color: 'gray85'
@@ -114,7 +454,7 @@ class Toplevel1:
         self.Label1.configure(foreground="#000000")
         self.Label1.configure(text='''Input Symbol''')
 
-        self.Data = tk.Button(self.Labelframe1)
+        self.Data = tk.Button(self.Labelframe1,command=self.loadsymbol)
         self.Data.place(relx=0.379, rely=0.357, height=34, width=127
                 , bordermode='ignore')
         self.Data.configure(activebackground="#ececec")
@@ -127,14 +467,15 @@ class Toplevel1:
         self.Data.configure(pady="0")
         self.Data.configure(text='''Load Symbol''')
 
+
         self.status = tk.Label(self.Labelframe1)
         self.status.place(relx=0.586, rely=0.476, height=21, width=203
                 , bordermode='ignore')
         self.status.configure(background="#d9d9d9")
         self.status.configure(disabledforeground="#a3a3a3")
         self.status.configure(foreground="#000000")
-        self.status.configure(text='''Status: Data download complete''')
-        #self.status.configure(text='''Status: waiting for symbol''')
+        self.status.configure(text='''Status: waiting for symbol''')
+
 
         self.Labelframe2 = tk.LabelFrame(top)
         self.Labelframe2.place(relx=0.079, rely=0.155, relheight=0.096
@@ -145,7 +486,7 @@ class Toplevel1:
         self.Labelframe2.configure(background="#d9d9d9")
 
 
-        text = " Symbol: {}    Last Price: {}    Open: {}    High:{}    Low:{}    Close:{}".format("AAPL",121,121,121,121,121,121)
+        text = " Symbol: {}    Last Price: {}    Current Volitality: {}".format(" ", " "," ")
 
         self.Labels = tk.Label(self.Labelframe2)
         self.Labels.place(relx=0.011, rely=0.476#, #height=21 #width=104
@@ -155,193 +496,6 @@ class Toplevel1:
         self.Labels.configure(foreground="#000000")
         self.Labels.configure(text=text)
 
-        # self.Radiobutton1 = tk.Radiobutton(self.Labelframe2)
-        # self.Radiobutton1.place(relx=0.104, rely=0.149, relheight=0.144
-        #         , relwidth=0.09, bordermode='ignore')
-        # self.Radiobutton1.configure(activebackground="#ececec")
-        # self.Radiobutton1.configure(activeforeground="#000000")
-        # self.Radiobutton1.configure(background="#d9d9d9")
-        # self.Radiobutton1.configure(disabledforeground="#a3a3a3")
-        # self.Radiobutton1.configure(foreground="#000000")
-        # self.Radiobutton1.configure(highlightbackground="#d9d9d9")
-        # self.Radiobutton1.configure(highlightcolor="black")
-        # self.Radiobutton1.configure(justify='left')
-        # self.Radiobutton1.configure(text='''Automatic''')
-        # #self.Radiobutton1.configure(variable=option_support.selectedButton)
-
-        # self.Radiobutton1_1 = tk.Radiobutton(self.Labelframe2)
-        # self.Radiobutton1_1.place(relx=0.104, rely=0.297, relheight=0.144
-        #         , relwidth=0.09, bordermode='ignore')
-        # self.Radiobutton1_1.configure(activebackground="#ececec")
-        # self.Radiobutton1_1.configure(activeforeground="#000000")
-        # self.Radiobutton1_1.configure(background="#d9d9d9")
-        # self.Radiobutton1_1.configure(cursor="fleur")
-        # self.Radiobutton1_1.configure(disabledforeground="#a3a3a3")
-        # self.Radiobutton1_1.configure(foreground="#000000")
-        # self.Radiobutton1_1.configure(highlightbackground="#d9d9d9")
-        # self.Radiobutton1_1.configure(highlightcolor="black")
-        # self.Radiobutton1_1.configure(justify='left')
-        # self.Radiobutton1_1.configure(text='''Regressive''')
-        # #self.Radiobutton1_1.configure(variable=option_support.selectedButton)
-
-        # self.Radiobutton1_2 = tk.Radiobutton(self.Labelframe2)
-        # self.Radiobutton1_2.place(relx=0.104, rely=0.446, relheight=0.153
-        #         , relwidth=0.09, bordermode='ignore')
-        # self.Radiobutton1_2.configure(activebackground="#ececec")
-        # self.Radiobutton1_2.configure(activeforeground="#000000")
-        # self.Radiobutton1_2.configure(background="#d9d9d9")
-        # self.Radiobutton1_2.configure(disabledforeground="#a3a3a3")
-        # self.Radiobutton1_2.configure(foreground="#000000")
-        # self.Radiobutton1_2.configure(highlightbackground="#d9d9d9")
-        # self.Radiobutton1_2.configure(highlightcolor="black")
-        # self.Radiobutton1_2.configure(justify='left')
-        # self.Radiobutton1_2.configure(text='''Stationary''')
-        # #self.Radiobutton1_2.configure(variable=option_support.selectedButton)
-
-        # self.Radiobutton1_3 = tk.Radiobutton(self.Labelframe2)
-        # self.Radiobutton1_3.place(relx=0.081, rely=0.594, relheight=0.134
-        #         , relwidth=0.113, bordermode='ignore')
-        # self.Radiobutton1_3.configure(activebackground="#ececec")
-        # self.Radiobutton1_3.configure(activeforeground="#000000")
-        # self.Radiobutton1_3.configure(background="#d9d9d9")
-        # self.Radiobutton1_3.configure(disabledforeground="#a3a3a3")
-        # self.Radiobutton1_3.configure(foreground="#000000")
-        # self.Radiobutton1_3.configure(highlightbackground="#d9d9d9")
-        # self.Radiobutton1_3.configure(highlightcolor="black")
-        # self.Radiobutton1_3.configure(justify='left')
-        # self.Radiobutton1_3.configure(text='''Bullish''')
-        # #self.Radiobutton1_3.configure(variable=option_support.selectedButton)
-
-        # self.Radiobutton1_3_1 = tk.Radiobutton(self.Labelframe2)
-        # self.Radiobutton1_3_1.place(relx=0.092, rely=0.743, relheight=0.134
-        #         , relwidth=0.09, bordermode='ignore')
-        # self.Radiobutton1_3_1.configure()
-        # self.Radiobutton1_3_1.configure()
-        # self.Radiobutton1_3_1.configure()
-        # self.Radiobutton1_3_1.configure()
-        # self.Radiobutton1_3_1.configure()
-        # self.Radiobutton1_3_1.configure()
-        # self.Radiobutton1_3_1.configure()
-        # self.Radiobutton1_3_1.configure()
-        # self.Radiobutton1_3_1.configure()
-        #self.Radiobutton1_3_1.configure(variable=option_support.selectedButton)
-
-        # global v
-        # v = tk.IntVar()
-        # v.set(1)
-
-        # for val, language in enumerate(choices):
-        #     print(val,language[0])
-        #     self.b=tk.Radiobutton(self.Labelframe2, 
-        #                   text=language[0],
-        #                   padx = 20, 
-        #                   variable=v, 
-        #                   command=ShowChoice,
-        #                   activebackground="#ececec",
-        #                   activeforeground="#000000",
-        #                   background="#d9d9d9",
-        #                   disabledforeground="#a3a3a3",
-        #                   foreground="#000000",
-        #                   highlightbackground="#d9d9d9",
-        #                   highlightcolor="black",
-        #                   justify='left',
-        #                   value=val)
-        #     self.b.place(relx=0.092, rely=0.15*(val+1), relheight=0.134
-        #         , relwidth=0.15, bordermode='ignore')
-
-
-        # self.Forecast = tk.Button(self.Labelframe2)
-        # self.Forecast.place(relx=0.762, rely=0.198, height=44, width=157
-        #         , bordermode='ignore')
-        # self.Forecast.configure(activebackground="#ececec")
-        # self.Forecast.configure(activeforeground="#000000")
-        # self.Forecast.configure(background="#d9d9d9")
-        # self.Forecast.configure(disabledforeground="#a3a3a3")
-        # self.Forecast.configure(foreground="#000000")
-        # self.Forecast.configure(highlightbackground="#d9d9d9")
-        # self.Forecast.configure(highlightcolor="black")
-        # self.Forecast.configure(pady="0")
-        # self.Forecast.configure(text='''Forecast''')
-
-        # self.Forecast_1 = tk.Button(self.Labelframe2)
-        # self.Forecast_1.place(relx=0.762, rely=0.644, height=44, width=157
-        #         , bordermode='ignore')
-        # self.Forecast_1.configure(activebackground="#ececec")
-        # self.Forecast_1.configure(activeforeground="#000000")
-        # self.Forecast_1.configure(background="#d9d9d9")
-        # self.Forecast_1.configure(disabledforeground="#a3a3a3")
-        # self.Forecast_1.configure(foreground="#000000")
-        # self.Forecast_1.configure(highlightbackground="#d9d9d9")
-        # self.Forecast_1.configure(highlightcolor="black")
-        # self.Forecast_1.configure(pady="0")
-        # self.Forecast_1.configure(text='''Chart''')
-
-        # self.regressive_input = tk.Entry(self.Labelframe2)
-        # self.regressive_input.place(relx=0.346, rely=0.347, height=17
-        #         , relwidth=0.109, bordermode='ignore')
-        # self.regressive_input.configure(background="white")
-        # self.regressive_input.configure(disabledforeground="#a3a3a3")
-        # self.regressive_input.configure(font="TkFixedFont")
-        # self.regressive_input.configure(foreground="#000000")
-        # self.regressive_input.configure(insertbackground="black")
-
-        # self.bulish_input = tk.Entry(self.Labelframe2)
-        # self.bulish_input.place(relx=0.346, rely=0.644, height=17, relwidth=0.109
-        #         , bordermode='ignore')
-        # self.bulish_input.configure(background="white")
-        # self.bulish_input.configure(disabledforeground="#a3a3a3")
-        # self.bulish_input.configure(font="TkFixedFont")
-        # self.bulish_input.configure(foreground="#000000")
-        # self.bulish_input.configure(highlightbackground="#d9d9d9")
-        # self.bulish_input.configure(highlightcolor="black")
-        # self.bulish_input.configure(insertbackground="black")
-        # self.bulish_input.configure(selectbackground="blue")
-        # self.bulish_input.configure(selectforeground="white")
-
-        # self.bearish_input = tk.Entry(self.Labelframe2)
-        # self.bearish_input.place(relx=0.346, rely=0.792, height=17
-        #         , relwidth=0.109, bordermode='ignore')
-        # self.bearish_input.configure(background="white")
-        # self.bearish_input.configure(disabledforeground="#a3a3a3")
-        # self.bearish_input.configure(font="TkFixedFont")
-        # self.bearish_input.configure(foreground="#000000")
-        # self.bearish_input.configure(highlightbackground="#d9d9d9")
-        # self.bearish_input.configure(highlightcolor="black")
-        # self.bearish_input.configure(insertbackground="black")
-        # self.bearish_input.configure(selectbackground="blue")
-        # self.bearish_input.configure(selectforeground="white")
-
-        # self.Label2 = tk.Label(self.Labelframe2)
-        # self.Label2.place(relx=0.277, rely=0.32, height=21, width=34
-        #         , bordermode='ignore')
-        # self.Label2.configure(background="#d9d9d9")
-        # self.Label2.configure(disabledforeground="#a3a3a3")
-        # self.Label2.configure(foreground="#000000")
-        # self.Label2.configure(text='''Days:''')
-
-        # self.Label2_1 = tk.Label(self.Labelframe2)
-        # self.Label2_1.place(relx=0.254, rely=0.62, height=21, width=73
-        #         , bordermode='ignore')
-        # self.Label2_1.configure(activebackground="#f9f9f9")
-        # self.Label2_1.configure(activeforeground="black")
-        # self.Label2_1.configure(background="#d9d9d9")
-        # self.Label2_1.configure(disabledforeground="#a3a3a3")
-        # self.Label2_1.configure(foreground="#000000")
-        # self.Label2_1.configure(highlightbackground="#d9d9d9")
-        # self.Label2_1.configure(highlightcolor="black")
-        # self.Label2_1.configure(text='''Magnitude:''')
-
-        # self.Label2_1_1 = tk.Label(self.Labelframe2)
-        # self.Label2_1_1.place(relx=0.254, rely=0.77, height=21, width=73
-        #         , bordermode='ignore')
-        # self.Label2_1_1.configure(activebackground="#f9f9f9")
-        # self.Label2_1_1.configure(activeforeground="black")
-        # self.Label2_1_1.configure(background="#d9d9d9")
-        # self.Label2_1_1.configure(disabledforeground="#a3a3a3")
-        # self.Label2_1_1.configure(foreground="#000000")
-        # self.Label2_1_1.configure(highlightbackground="#d9d9d9")
-        # self.Label2_1_1.configure(highlightcolor="black")
-        # self.Label2_1_1.configure(text='''Magnitude:''')
 
         self.Labelframe3 = tk.LabelFrame(top)
         self.Labelframe3.place(relx=0.079, rely=0.269, relheight=0.598
@@ -352,68 +506,10 @@ class Toplevel1:
         self.Labelframe3.configure(background="#d9d9d9")
 
         labels = ["Expiry Date", "67% confidence range", "Strike","Bid","95% confidence range", "Strike","Bid", "Most Open Interest"]
+
         width = [12,18,8,8,18,8,8,25]
 
 
-
-        dates = ['2020-11-13', '2020-11-20', '2020-11-27', '2020-12-04',
-               '2020-12-11', '2020-12-18', '2020-12-24', '2021-01-15',
-               '2021-02-19', '2021-03-19', '2021-04-16', '2021-06-18',
-               '2021-09-17']
-
-        int1= [(110.77506409253698, 121.70832398350228),
-         (106.8949916778185, 126.85630190897905),
-         (104.49641738178009, 130.52278171577572),
-         (99.95557924731003, 138.86733638252065),
-         (96.30650158701738, 147.58803608584643),
-         (91.6670798528975, 163.63860741679085),
-         (90.51633522238625, 169.86097409033522),
-         (88.97453389470878, 182.81392501483725),
-         (88.38670974348844, 199.88452080591526),
-         (89.5686705929695, 221.52485915008327),
-         (92.5224399453131, 245.19710552366362),
-         (95.04099151922078, 259.1613255896136),
-         (99.18683882391986, 277.8377774785636)]
-
-        int2 = [(105.30843414705433, 127.17495392898493),
-         (96.9143365622382, 136.83695702455933),
-         (91.48323521478227, 143.53596388277356),
-         (80.49970067970472, 158.32321495012596),
-         (70.66573433760286, 173.22880333526095),
-         (55.681316070950814, 199.62437119873755),
-         (50.84401578841175, 209.53329352430973),
-         (42.05483833464456, 229.73362057490147),
-         (32.63780421227503, 255.63342633712867),
-         (23.5905763144126, 287.5029534286402),
-         (16.185107156137832, 321.5344383128389),
-         (12.980824484024367, 341.22149262481),
-         (9.861369496597973, 367.1632468058855)]
-
-        int1 = [(round(i[0],2),round(i[1],2)) for i in int1]
-        int2 = [(round(i[0],2),round(i[1],2)) for i in int2]
-
-        puts =[110.0,106.0,104.0,99.0,96.0,90.0,90.0,88.75,85.0,88.75,92.5,95.0, 97.5]
-        ask = [0.09, 0.24, 0.28, 0.27, 0.3, 0.25, 0.32, 0.52, 0.78, 1.36, 2.16, 3.85, 6.05]
-
-
-        puts2= [105.0, 96.0, 90.0, 80.0, 70.0, 33.75, 0, 40.0, 0, 0, 0, 0, 0]
-        ask2 = [0.04, 0.07, 0.08, 0.09, 0.07, 0.16, 0, 0.05, 0, 0, 0, 0, 0]
-
-        oi = ["OI: 11386 strike: 110.0 , ask: 0.09 ",
-"OI: 32003 strike: 100.0 , ask: 0.11 ",
-"OI: 2943 strike: 100.0 , ask: 0.17 ",
-"OI: 1187 strike: 90.0 , ask: 0.13 ",
-"OI: 939 strike: 90.0 , ask: 0.18 ",
-"OI: 45691 strike: 90.0 , ask: 0.25 ",
-"OI: 296 strike: 90.0 , ask: 0.32 ",
-"OI: 83097 strike: 37.5 , ask: 0.04 ",
-"OI: 1291 strike: 80.0 , ask: 0.59 ",
-"OI: 13625 strike: 80.0 , ask: 0.77 ",
-"OI: 4042 strike: 90.0 , ask: 1.81 ",
-"OI: 30193 strike: 45.0 , ask: 0.29 ",
-"OI: 14265 strike: 90.0 , ask: 4.1 "]
-
-        label = [dates,int1,puts,ask,int2,puts2,ask2,oi]
         for i in range(len(labels)):
             self.label1 = tk.Label(self.Labelframe3 ,text=labels[i],width=width[i])
 
@@ -427,7 +523,38 @@ class Toplevel1:
             self.label1.configure(highlightcolor="black")
             self.label1.grid(row=1, column=i,padx=5)
 
-        for j in range(13):
+
+    def loadsymbol(self):
+
+        self.status['text'] ="hello"
+
+        symbol = self.Entry1.get()
+
+
+        df = get_all_options("AAPL",self)
+
+        dates = df.expiration.unique()
+        dates_count= days_counter(dates)
+
+        info,price_1,price_2= database(symbol,900)
+        cur_price = info['LastPrice'].values[0]
+        symbol = info['Symbol'].values[0]
+        list1,list2 = report(dates,dates_count,price_1,price_2,df)
+
+
+        width = [12,18,8,8,18,8,8,25]
+
+        oi = most_oi(df,dates)
+
+        puts = np.array(list1).T[0]
+        ask = np.array(list1).T[1]
+
+        puts2 = np.array(list2).T[0]
+        ask2 = np.array(list2).T[1]
+
+        label = [dates,price_1,puts,ask,price_2,puts2,ask2,oi]
+
+        for j in range(len(dates)):
             for i in range(len(label)):
                 self.label1 = tk.Label(self.Labelframe3 ,text=label[i][j],width=width[i])
 
@@ -440,8 +567,6 @@ class Toplevel1:
                 self.label1.configure(highlightbackground="#d9d9d9")
                 self.label1.configure(highlightcolor="black")
                 self.label1.grid(row=j+2, column=i,padx=5)
-
-
 
 
 
