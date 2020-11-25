@@ -144,31 +144,37 @@ def add_options_to_list(res,ls):
 
 
 def get_all_options(symbol):
-    
+
     cols=['contractSymbol','type','currency', 'inTheMoney',  \
           'impliedVolatility', 'expiration', 'change',  \
           'strike', 'contractSize', 'lastPrice',\
           'openInterest', 'percentChange', 'ask', 'bid','volume', 'lastTradeDate', ]
 
     res, dates = get_first_option(symbol)
-    
+
     ls = []
     print("Processing date:","{: %Y-%m-%d}".format(datetime.fromtimestamp(dates[0]+1)))
     add_options_to_list(res,ls)
-    
-    
+
     #now add the remaining ones. 
     for i in range(1,len(dates)):
         print("Processing date:","{: %Y-%m-%d}".format(datetime.fromtimestamp(dates[i]+1)))
         res = get_option(symbol,dates[i])
         add_options_to_list(res,ls)
-    
-    
+
     df = pd.DataFrame(ls,columns=cols)
     df.to_csv(symbol+"_options.csv",index=False)
-    
 
 
-symbol = sys.argv[1]
 
-get_all_options(symbol)
+# symbol = sys.argv[1]
+
+# get_all_options(symbol)
+
+import finviz
+print(finviz.get_analyst_price_targets('AAPL'))
+
+# print(finviz.get_stock('AMD'))
+
+
+# print(finviz.get_news('AAPL')[-5:])

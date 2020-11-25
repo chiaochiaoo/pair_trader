@@ -5,6 +5,7 @@ import json
 import pip
 from datetime import datetime
 from datetime import date
+import finviz
 
 try:
     import Tkinter as tk
@@ -175,7 +176,7 @@ def get_all_options(symbol,ui):
     #now add the remaining ones.
     #for i in range(1,2):
 
-    for i in range(1,min(len(dates),5)):
+    for i in range(1,min(len(dates),8)):
         #ui.status['text'] ="Processing date:","{: %Y-%m-%d}".format(datetime.fromtimestamp(dates[i]+3600*5))
         ui.status['text'] ="Downloading data and Forecasting... "+str(percentage*i)+" %"
         res = get_option(symbol,dates[i])
@@ -350,17 +351,17 @@ def get_current_info(symbol):
 
     return res
 
-def database(symbol,days):
+def database(symbol,days,last_price,volitality):
 
-    j = download_daily(symbol, days)
+    #j = download_daily(symbol, days)
     # t = pd.to_datetime(j["day"])
-    p = j["close"]
-    info = get_current_info(symbol)
-    cur_price = info["LastPrice"].values[0]
-    dev = STD(cur_price,HV(p[-200:]),days)
+    #info = get_current_info(symbol)
+    cur_price = last_price# info["LastPrice"].values[0]
+
+    dev = STD(cur_price,volitality,days)
     price_1,price_2 = price_range(cur_price,dev)
 
-    return info,price_1,price_2,round(HV(p[-252:])*100,3)
+    return price_1,price_2
 
 
 # v = 1
@@ -477,7 +478,7 @@ class Toplevel1:
 
 
         self.Labelframe2 = tk.LabelFrame(top)
-        self.Labelframe2.place(relx=0.079, rely=0.14, relheight=0.1
+        self.Labelframe2.place(relx=0.079, rely=0.14, relheight=0.08
                 , relwidth=0.85)
         self.Labelframe2.configure(relief='groove')
         self.Labelframe2.configure(foreground="black")
@@ -485,7 +486,7 @@ class Toplevel1:
         self.Labelframe2.configure(background="#d9d9d9")
 
 
-        text = ["Symbol:","Last Price:","Target Price:","P/E:","Earning date:","Perf Week","Perf Month","Perf Quarter","Perf Half Y","Perf Year","Weekly Volitality:","Monthly Volitality:",]
+        text = ["Symbol:","Last Price:","Target Price:","P/E:","Change:","Perf Week","Perf Month","Perf Quarter","Perf Half Y","Perf Year","Weekly Volitality:","Monthly Volitality:",]
         self.info = []
         for i in range(len(text)*2): #Rows
             if i%2 ==0:
@@ -507,12 +508,16 @@ class Toplevel1:
 
 
         self.Labelframe2b = tk.LabelFrame(top)
-        self.Labelframe2b.place(relx=0.079, rely=0.26, relheight=0.1
+        self.Labelframe2b.place(relx=0.079, rely=0.24, relheight=0.12
                 , relwidth=0.85)
         self.Labelframe2b.configure(relief='groove')
         self.Labelframe2b.configure(foreground="black")
         self.Labelframe2b.configure(text='''Symbol Ratings''')
         self.Labelframe2b.configure(background="#d9d9d9")
+
+
+        #t = ["Date","Analyst","Rating","Price from","Price to"]
+        #width = [15,25,15,25,25]
 
         sample = [{'date': 'Oct-26-20', 'category': 'Resumed','analyst': 'Atlantic Equities','rating': 'Overweight','price_from': 0.0,'price_to': 150.0}, {'date': 'Sep-21-20',
 'category': 'Reiterated',
@@ -539,20 +544,22 @@ class Toplevel1:
   'price_from': 105.0,
   'price_to': 125.0}]
 
-        # row +=1
-        # for i in sample:
-        #     te = "{}{}{}{}{}{}{}{}".format(i["date"],i["analyst"],"rating:",i["rating"],"from",i["price_from"],"to",i["price_to"])
-        #     self.b = tk.Label(self.Labelframe2, text=te,justify="left",width=50, anchor="w")
-        #     self.b.configure(activebackground="#f9f9f9")
-        #     self.b.configure(activeforeground="black")
-        #     self.b.configure(background="#d9d9d9")
-        #     self.b.configure(disabledforeground="#a3a3a3")
-        #     #self.b.configure(relief="ridge")
-        #     self.b.configure(foreground="#000000")
-        #     self.b.configure(highlightbackground="#d9d9d9")
-        #     self.b.configure(highlightcolor="black")
-        #     self.b.grid(sticky = "w",row=row+1,padx=5)
-        #     row +=1
+        self.ratings = []
+        row =0
+        for i in range(5):
+            #te = "Date: {}  Analyst: {}   Rating: {}  Price from: {} to {}".format(i["date"],i["analyst"],i["rating"],i["price_from"],i["price_to"])
+            self.b = tk.Label(self.Labelframe2b, text="",justify="left",width=100, anchor="w")
+            self.b.configure(activebackground="#f9f9f9")
+            self.b.configure(activeforeground="black")
+            self.b.configure(background="#d9d9d9")
+            self.b.configure(disabledforeground="#a3a3a3")
+            #self.b.configure(relief="ridge")
+            self.b.configure(foreground="#000000")
+            self.b.configure(highlightbackground="#d9d9d9")
+            self.b.configure(highlightcolor="black")
+            self.b.grid(sticky = "w",row=row,padx=5)
+            row +=1
+            self.ratings.append(self.b)
 
 
         # for i in range(len(text)):
@@ -666,7 +673,7 @@ class Toplevel1:
     def loadsymbol(self):
 
 
-        symbol = self.Entry1.get().capitalize()
+        symbol = self.Entry1.get().upper()
 
         if validity_check(symbol):
 
@@ -723,16 +730,32 @@ class Toplevel1:
 
 
 def database_function(UI,symbol):
-    info,price_1,price_2,vol= database(symbol,900)
 
-    cur_price = info['LastPrice'].values[0]
-    symbol = info['Symbol'].values[0]
-    day_vol = round(vol/np.sqrt (252),3)
-    UI.Labels["text"] = " Symbol: {}    Last Price: {}    Weekly Volitality: {}%  Monthly Volitality: {}%".format(symbol, cur_price,vol,day_vol)
+    analyst_ratings = finviz.get_analyst_price_targets(symbol)
+    infos = finviz.get_stock(symbol)
+
+    wv,mv = infos['Volatility'].split(" ")[0],infos['Volatility'].split(" ")[1]
+    dic = [symbol,infos['Price'],infos['Target Price'],infos['P/E'],infos['Change'],infos['Perf Week'],infos['Perf Month'],infos['Perf Quarter'],infos['Perf Half Y'],infos['Perf Year'],wv,mv]
+
+    for i in range(len(UI.info)):
+        UI.info[i]["text"] = dic[i]
+
+    vol = float(mv.strip("%"))*0.158745
+
+    price = float(infos['Price'])
+    price_1,price_2= database(symbol,900,price,vol)
+
+
+    for j in range(max(len(analyst_ratings),5)):
+        a = analyst_ratings[j]
+        te = "Date: {}  Analyst: {}   Rating: {}  Price from: {} to {}".format(a["date"],a["analyst"],a["rating"],a["price_from"],a["price_to"])
+        UI.ratings[j]["text"] = te
+
+    # UI.Labels["text"] = " Symbol: {}    Last Price: {}    Weekly Volitality: {}%  Monthly Volitality: {}%".format(symbol, cur_price,vol,day_vol)
 
     #UI.status['text'] ="Downloading options data"
 
-    #UI.loadoptions(symbol,price_1,price_2,cur_price)
+    UI.loadoptions(symbol,price_1,price_2,price)
 
     UI.Data["state"] = "normal"
 
