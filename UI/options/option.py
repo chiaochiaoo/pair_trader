@@ -1,11 +1,29 @@
 import sys
-import threading
-import requests
-import json
 import pip
 from datetime import datetime
 from datetime import date
-import finviz
+import threading
+
+try:
+    import json 
+except ImportError:
+    pip.main(['install', 'json'])
+    import json 
+
+
+try:
+    import finviz 
+except ImportError:
+    pip.main(['install', 'finviz'])
+    import finviz 
+
+
+try:
+    import requests 
+except ImportError:
+    pip.main(['install', 'requests'])
+    import requests 
+
 
 try:
     import Tkinter as tk
@@ -16,19 +34,15 @@ try:
     import ttk
     py3 = False
 except ImportError:
+    #pip.main(['install', 'tkinter'])
     import tkinter.ttk as ttk
     py3 = True
 
-try:
-    import pandas as pd
-except ImportError:
-    pip.main(['install', 'pandas'])
-    import pandas as pd
 
 try:
     import numpy as np
 except ImportError:
-    pip.main(['install', 'numpy'])
+    pip.main(['install', 'numpy==1.19.3'])
     import numpy as np
 
 try:
@@ -37,7 +51,11 @@ except ImportError:
     pip.main(['install', 'matplotlib'])
     import matplotlib.pyplot as plt
 
-
+try:
+    import pandas as pd
+except ImportError:
+    pip.main(['install', 'pandas'])
+    import pandas as pd
 ######################
 
 ###### Need to destroy the buttons and labels when a new symbols are loaded. 
@@ -176,7 +194,7 @@ def get_all_options(symbol,ui):
     #now add the remaining ones.
     #for i in range(1,2):
 
-    for i in range(1,min(len(dates),8)):
+    for i in range(1,min(len(dates),3)):
         #ui.status['text'] ="Processing date:","{: %Y-%m-%d}".format(datetime.fromtimestamp(dates[i]+3600*5))
         ui.status['text'] ="Downloading data and Forecasting... "+str(percentage*i)+" %"
         res = get_option(symbol,dates[i])
@@ -228,8 +246,10 @@ def report(dates,dates_count,price_1,price_2,df):
     list1 = []
     list2 = []
 
+    print(dates,dates_count,price_1[:10],price_2[:10])
     for i in range(len(dates)):
 
+        print(dates[i],dates_count[i],price_1[dates_count[i]][0],price_2[dates_count[i]][0])
         target1 = df.loc[(df["expiration"]==dates[i])&(df["type"]=="puts")&(df["strike"]<price_1[dates_count[i]][0])].copy().reset_index()
         target2 = df.loc[(df["expiration"]==dates[i])&(df["type"]=="puts")&(df["strike"]<price_2[dates_count[i]][0])].copy().reset_index()
 
@@ -240,14 +260,16 @@ def report(dates,dates_count,price_1,price_2,df):
         strike2 =0
         bid2 = 0
 
+        print(target1["strike"])
+        print(target1["bid"])
         if len(target1)>0:
             target1 = target1.loc[target1["bid"]==max(target1["bid"])].copy().reset_index()
-            target1 = target1.loc[target1["strike"]==min(target1["strike"])]
+            #target1 = target1.loc[target1["strike"]==min(target1["strike"])]
             strike1 = target1["strike"].values[0]
             bid1 = target1["bid"].values[0]
         if len(target2)>0:
             target2 = target2.loc[target2["bid"]==max(target2["bid"])].copy().reset_index()
-            target2 = target2.loc[target2["strike"]==min(target2["strike"])]
+            #target2 = target2.loc[target2["strike"]==min(target2["strike"])]
             strike2 = target2["strike"].values[0]
             bid2 = target2["bid"].values[0]
         #Third, pick the lowest strike. 
@@ -595,6 +617,7 @@ class Toplevel1:
         self.Labelframe3.configure(text='''Options''')
         self.Labelframe3.configure(background="#d9d9d9")
 
+
         labels = ["Expiry Date", "Days left","67% confidence range", "Strike","Bid","95% confidence range", "Strike","Bid", "Most Open Interest"]
 
         width = [12,6,18,8,8,18,8,8,25]
@@ -632,7 +655,11 @@ class Toplevel1:
         puts2 = np.array(list2).T[0]
         ask2 = np.array(list2).T[1]
 
-        label = [dates,dates_count,price_1,puts,ask,price_2,puts2,ask2,oi]
+
+        p1 = np.array(price_1,dtype=object)[dates_count]
+        p2 = np.array(price_2,dtype=object)[dates_count]
+
+        label = [dates,dates_count,p1,puts,ask,p2,puts2,ask2,oi]
 
         for j in range(len(dates)):
             self.display.append([])
