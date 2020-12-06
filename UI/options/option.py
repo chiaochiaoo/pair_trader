@@ -194,11 +194,14 @@ def get_all_options(symbol,ui):
     #now add the remaining ones.
     #for i in range(1,2):
 
-    for i in range(1,min(len(dates),3)):
+    for i in range(1,min(len(dates),5)):
         #ui.status['text'] ="Processing date:","{: %Y-%m-%d}".format(datetime.fromtimestamp(dates[i]+3600*5))
         ui.status['text'] ="Downloading data and Forecasting... "+str(percentage*i)+" %"
-        res = get_option(symbol,dates[i])
-        add_options_to_list(res,ls)
+        try:
+            res = get_option(symbol,dates[i])
+            add_options_to_list(res,ls)
+        except:
+            print("Donwloading "+dates[i]+" failed")
 
     df = pd.DataFrame(ls,columns=cols)
     #df.to_csv(symbol+"_options.csv",index=False)
@@ -237,7 +240,7 @@ def oi_str(oi):
     s = []
 
     for i in oi:
-        s.append("Strike: "+str(i[0])+", Ask: "+str(i[1]))
+        s.append("Strike: "+str(i[0]))
 
     return s
 
@@ -246,10 +249,10 @@ def report(dates,dates_count,price_1,price_2,df):
     list1 = []
     list2 = []
 
-    print(dates,dates_count,price_1[:10],price_2[:10])
+    #print(dates,dates_count,price_1[:10],price_2[:10])
     for i in range(len(dates)):
 
-        print(dates[i],dates_count[i],price_1[dates_count[i]][0],price_2[dates_count[i]][0])
+        #print(dates[i],dates_count[i],price_1[dates_count[i]][0],price_2[dates_count[i]][0])
         target1 = df.loc[(df["expiration"]==dates[i])&(df["type"]=="puts")&(df["strike"]<price_1[dates_count[i]][0])].copy().reset_index()
         target2 = df.loc[(df["expiration"]==dates[i])&(df["type"]=="puts")&(df["strike"]<price_2[dates_count[i]][0])].copy().reset_index()
 
@@ -264,12 +267,12 @@ def report(dates,dates_count,price_1,price_2,df):
         print(target1["bid"])
         if len(target1)>0:
             target1 = target1.loc[target1["bid"]==max(target1["bid"])].copy().reset_index()
-            #target1 = target1.loc[target1["strike"]==min(target1["strike"])]
+            target1 = target1.loc[target1["strike"]==min(target1["strike"])]
             strike1 = target1["strike"].values[0]
             bid1 = target1["bid"].values[0]
         if len(target2)>0:
             target2 = target2.loc[target2["bid"]==max(target2["bid"])].copy().reset_index()
-            #target2 = target2.loc[target2["strike"]==min(target2["strike"])]
+            target2 = target2.loc[target2["strike"]==min(target2["strike"])]
             strike2 = target2["strike"].values[0]
             bid2 = target2["bid"].values[0]
         #Third, pick the lowest strike. 
@@ -541,30 +544,6 @@ class Toplevel1:
         #t = ["Date","Analyst","Rating","Price from","Price to"]
         #width = [15,25,15,25,25]
 
-        sample = [{'date': 'Oct-26-20', 'category': 'Resumed','analyst': 'Atlantic Equities','rating': 'Overweight','price_from': 0.0,'price_to': 150.0}, {'date': 'Sep-21-20',
-'category': 'Reiterated',
-  'analyst': 'Citigroup',
-  'rating': 'Buy',
-  'price_from': 112.5,
-  'price_to': 125.0},
- {'date': 'Sep-17-20',
-  'category': 'Reiterated',
-  'analyst': 'Jefferies',
-  'rating': 'Buy',
-  'price_from': 116.25,
-  'price_to': 135.0},
- {'date': 'Sep-16-20',
-  'category': 'Reiterated',
-  'analyst': 'Needham',
-  'rating': 'Buy',
-  'price_from': 112.5,
-  'price_to': 140.0},
- {'date': 'Sep-14-20',
-  'category': 'Reiterated',
-  'analyst': 'Oppenheimer',
-  'rating': 'Outperform',
-  'price_from': 105.0,
-  'price_to': 125.0}]
 
         self.ratings = []
         row =0
